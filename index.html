@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/reset.css">
 <link rel="stylesheet" href="css/common.css">
 <link rel="stylesheet" href="css/title.css">
+<link rel="stylesheet" href="css/game-start.css?v=20260722-1">
 <link rel="stylesheet" href="css/table.css">
 <link rel="stylesheet" href="css/tiles.css?v=20260721-2">
 <link rel="stylesheet" href="css/character.css?v=20260721-2">
@@ -34,24 +35,56 @@
     </div>
   </section>
 
-  <!-- ===== 対戦相手選択 ===== -->
-  <section id="screen-character-select" class="screen sub-screen">
-    <div class="sub-panel character-select-panel">
-      <header class="character-select-header">
-        <div><p class="select-kicker">MEMBER SELECTION</p><h2 class="sub-title">今夜の対戦相手</h2><p class="select-help">CPUを3人選び、右席・対面・左席へ配置してください。</p></div>
-        <div id="selection-count" class="selection-count">0 / 3</div>
-      </header>
-      <div id="character-grid" class="character-select-grid" aria-label="キャラクター一覧"></div>
-      <div class="seat-selection">
-        <div class="seat-slot"><span>右席</span><strong id="selected-seat-1">未選択</strong></div>
-        <div class="seat-slot"><span>対面</span><strong id="selected-seat-2">未選択</strong></div>
-        <div class="seat-slot"><span>左席</span><strong id="selected-seat-3">未選択</strong></div>
+  <!-- ===== GAME START / 対局準備 ===== -->
+  <section id="screen-character-select" class="screen prep-screen">
+    <div class="prep-stage">
+      <img class="prep-base-image" src="assets/game-start-ui.png" alt="GAME START 今夜の卓を準備する" draggable="false">
+
+      <label class="prep-name-field">
+        <span class="sr-only">プレイヤー名</span>
+        <input id="player-name" type="text" maxlength="12" autocomplete="nickname"
+          aria-describedby="profile-error" aria-label="プレイヤー名（1文字以上12文字以内）">
+      </label>
+      <div id="profile-error" class="prep-error" role="alert" aria-live="polite"></div>
+
+      <div id="avatar-grid" class="prep-avatar-grid" role="radiogroup" aria-label="アバターを選択">
+        <button type="button" class="prep-avatar avatar-1" data-avatar="avatar-1" role="radio" aria-checked="false" aria-label="若い女性"></button>
+        <button type="button" class="prep-avatar avatar-2" data-avatar="avatar-2" role="radio" aria-checked="false" aria-label="熟女"></button>
+        <button type="button" class="prep-avatar avatar-3" data-avatar="avatar-3" role="radio" aria-checked="false" aria-label="若い男性"></button>
+        <button type="button" class="prep-avatar avatar-4" data-avatar="avatar-4" role="radio" aria-checked="false" aria-label="熟年男性"></button>
+        <button type="button" class="prep-avatar avatar-5" data-avatar="avatar-5" role="radio" aria-checked="false" aria-label="茶色の長毛猫"></button>
+        <button type="button" class="prep-avatar avatar-6" data-avatar="avatar-6" role="radio" aria-checked="false" aria-label="チャウチャウ"></button>
       </div>
-      <div class="character-select-actions">
-        <button id="btn-random-characters" class="menu-btn">おまかせ</button>
-        <button id="btn-confirm-characters" class="menu-btn primary" disabled>このメンバーで開始</button>
-        <button id="btn-character-back" class="menu-btn">もどる</button>
+
+      <div id="character-grid" class="prep-opponent-grid" role="group" aria-label="今宵の対戦相手。3人選択してください">
+        <button type="button" class="prep-opponent opponent-ayano" data-character-id="ayano" aria-pressed="false" aria-label="神楽坂綾乃"></button>
+        <button type="button" class="prep-opponent opponent-lili" data-character-id="lili" aria-pressed="false" aria-label="有栖川リリ"></button>
+        <button type="button" class="prep-opponent opponent-masked" data-character-id="masked" aria-pressed="false" aria-label="謎の覆面"></button>
+        <button type="button" class="prep-opponent opponent-tanabe" data-character-id="tanabe" aria-pressed="false" aria-label="田辺一"></button>
+        <button type="button" class="prep-opponent opponent-tome" data-character-id="tome" aria-pressed="false" aria-label="梅沢トメ"></button>
+        <button type="button" class="prep-opponent opponent-chiipon" data-character-id="mofuzo" aria-pressed="false" aria-label="ちいぽん"></button>
       </div>
+      <div id="selection-count" class="prep-selection-count" aria-live="polite">0 / 3</div>
+      <button id="btn-random-characters" class="prep-hotspot prep-random" aria-label="対戦相手をおまかせで3人選ぶ"></button>
+
+      <div class="prep-setting-group prep-bgm" role="group" aria-label="BGM">
+        <button type="button" id="prep-bgm-on" class="prep-option" aria-pressed="false" aria-label="BGMをON"></button>
+        <button type="button" id="prep-bgm-off" class="prep-option" aria-pressed="false" aria-label="BGMをOFF"></button>
+      </div>
+      <div class="prep-setting-group prep-se" role="group" aria-label="効果音">
+        <button type="button" id="prep-se-on" class="prep-option" aria-pressed="false" aria-label="効果音をON"></button>
+        <button type="button" id="prep-se-off" class="prep-option" aria-pressed="false" aria-label="効果音をOFF"></button>
+      </div>
+      <label class="prep-volume-wrap">
+        <span class="sr-only">音量</span>
+        <input id="prep-volume" type="range" min="0" max="100" value="60" aria-label="音量">
+      </label>
+      <output id="prep-volume-value" class="prep-volume-value" for="prep-volume">60%</output>
+      <button id="prep-reset" class="prep-hotspot prep-reset" aria-label="セーブデータを初期化"></button>
+
+      <button id="btn-character-back" class="prep-hotspot prep-back" aria-label="タイトル画面へ戻る"></button>
+      <button id="btn-confirm-characters" class="prep-hotspot prep-confirm" aria-label="この卓で対局を始める" disabled></button>
+      <button id="btn-prep-howto" class="prep-hotspot prep-howto" aria-label="遊び方"></button>
     </div>
   </section>
 

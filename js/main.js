@@ -12,6 +12,7 @@ const DEBUG_MODE = true;
 
   const Main = {};
   let characterSelection = null;
+  let selectedAvatar = '';
 
   Main.goTitle = function () {
     YM.timers.clearAll();
@@ -30,18 +31,147 @@ const DEBUG_MODE = true;
   function startGame() {
     AU().unlock();
     AU().se('decide');
-    const saved = St().data.selectedCharacters || YM.defaultCharacterSelection;
+    const saved = St().data.selectedCharacters || [];
     characterSelection = YM.CharacterUI.buildCharacterSelect(saved);
+    refreshProfileUI();
+    refreshPrepSettingsUI();
+    updatePrepReady();
     UI().showScreen('character-select');
   }
 
   function confirmCharacters() {
     const selected = characterSelection ? characterSelection.getSelected() : [];
+    const name = $id('player-name').value.trim();
+    if (!name) {
+      $id('profile-error').textContent = 'プレイヤー名を入力してください。';
+      $id('player-name').focus();
+      return;
+    }
+    if (!selectedAvatar) {
+      $id('profile-error').textContent = 'アバターを1つ選んでください。';
+      return;
+    }
     if (selected.length !== 3) return;
+    St().data.playerProfile = { name: name.slice(0, 12), avatar: selectedAvatar };
     St().data.selectedCharacters = selected;
     St().save();
     AU().se('decide');
     YM.Round.startGame(selected);
+  }
+
+  /* ===== GAME START準備画面 ===== */
+  function refreshProfileUI() {
+    const profile = St().data.playerProfile || { name: '', avatar: '' };
+    $id('player-name').value = profile.name || '';
+    selectedAvatar = profile.avatar || '';
+    renderAvatarSelection();
+    $id('profile-error').textContent = '';
+  }
+
+  function renderAvatarSelection() {
+    document.querySelectorAll('.prep-avatar').forEach(btn => {
+      const active = btn.dataset.avatar === selectedAvatar;
+      btn.classList.toggle('selected', active);
+      btn.setAttribute('aria-checked', String(active));
+      btn.tabIndex = active || !selectedAvatar ? 0 : -1;
+    });
+  }
+
+  function updatePrepReady(showNameError) {
+    const name = $id('player-name').value.trim();
+    const opponents = characterSelection ? characterSelection.getSelected() : [];
+    const ready = !!name && !!selectedAvatar && opponents.length === 3;
+    const button = $id('btn-confirm-characters');
+    button.disabled = !ready;
+    button.classList.toggle('ready', ready);
+    if (showNameError && !name) $id('profile-error').textContent = 'プレイヤー名を入力してください。';
+    else if (name) $id('profile-error').textContent = '';
+  }
+
+  function refreshPrepSettingsUI() {
+    if (!$id('prep-volume')) return;
+    const s = St().data.settings;
+    const setOption = (id, selected) => {
+      const el = $id(id);
+      el.classList.toggle('selected', selected);
+      el.setAttribute('aria-pressed', String(selected));
+    };
+    setOption('prep-bgm-on', s.bgm);
+    setOption('prep-bgm-off', !s.bgm);
+    setOption('prep-se-on', s.se);
+    setOption('prep-se-off', !s.se);
+    $id('prep-volume').value = s.volume;
+    $id('prep-volume-value').value = `${s.volume}%`;
+    $id('prep-volume-value').textContent = `${s.volume}%`;
+  }
+
+  function resetSaveData() {
+    if (!confirm('名前、アイコン、対戦成績、解放イベント、選択メンバー、設定をすべて初期化します。よろしいですか？')) return;
+    St().reset();
+    St().save();
+    applyAudioSettings();
+    refreshSettingsUI();
+    refreshProfileUI();
+    characterSelection = YM.CharacterUI.buildCharacterSelect([]);
+    updatePrepReady();
+    refreshContinue();
+    alert('初期化しました。');
+  }
+
+  function wirePrepScreen() {
+    $id('player-name').addEventListener('input', e => {
+      St().data.playerProfile.name = e.target.value.slice(0, 12);
+      St().save();
+      updatePrepReady(false);
+    });
+    $id('player-name').addEventListener('blur', () => {
+      St().data.playerProfile.name = $id('player-name').value.trim().slice(0, 12);
+      $id('player-name').value = St().data.playerProfile.name;
+      St().save();
+      updatePrepReady(true);
+    });
+    document.querySelectorAll('.prep-avatar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedAvatar = btn.dataset.avatar;
+        St().data.playerProfile.avatar = selectedAvatar;
+        St().save();
+        renderAvatarSelection();
+        updatePrepReady();
+        AU().se('select');
+      });
+      btn.addEventListener('keydown', e => {
+        if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+        e.preventDefault();
+        const buttons = Array.from(document.querySelectorAll('.prep-avatar'));
+        const current = buttons.indexOf(btn);
+        const delta = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' ? -3 : 3;
+        buttons[(current + delta + buttons.length) % buttons.length].focus();
+      });
+    });
+    document.addEventListener('ym:opponents-changed', e => {
+      St().data.selectedCharacters = e.detail.slice();
+      St().save();
+      updatePrepReady();
+    });
+
+    const setAudio = (key, value) => {
+      St().data.settings[key] = value;
+      St().save();
+      applyAudioSettings();
+      refreshSettingsUI();
+      AU().se('select');
+    };
+    $id('prep-bgm-on').addEventListener('click', () => setAudio('bgm', true));
+    $id('prep-bgm-off').addEventListener('click', () => setAudio('bgm', false));
+    $id('prep-se-on').addEventListener('click', () => setAudio('se', true));
+    $id('prep-se-off').addEventListener('click', () => setAudio('se', false));
+    $id('prep-volume').addEventListener('input', e => {
+      St().data.settings.volume = parseInt(e.target.value, 10);
+      St().save();
+      applyAudioSettings();
+      refreshSettingsUI();
+    });
+    $id('prep-reset').addEventListener('click', resetSaveData);
   }
 
   /* ===== 設定画面 ===== */
@@ -53,6 +183,7 @@ const DEBUG_MODE = true;
     $id('set-se').classList.toggle('off', !s.se);
     $id('set-volume').value = s.volume;
     $id('set-volume-val').textContent = s.volume;
+    refreshPrepSettingsUI();
   }
 
   function applyAudioSettings() {
@@ -79,16 +210,7 @@ const DEBUG_MODE = true;
       St().save(); applyAudioSettings();
       $id('set-volume-val').textContent = e.target.value;
     });
-    $id('set-reset').addEventListener('click', () => {
-      if (confirm('セーブデータを初期化します。よろしいですか?')) {
-        St().reset();
-        St().save();
-        applyAudioSettings();
-        refreshSettingsUI();
-        refreshContinue();
-        alert('初期化しました。');
-      }
-    });
+    $id('set-reset').addEventListener('click', resetSaveData);
   }
 
   /* ===== スマホ判定 ===== */
@@ -102,6 +224,7 @@ const DEBUG_MODE = true;
   document.addEventListener('DOMContentLoaded', () => {
     St().load();
     applyAudioSettings();
+    wirePrepScreen();
     wireSettings();
     refreshSettingsUI();
     refreshContinue();
@@ -114,7 +237,8 @@ const DEBUG_MODE = true;
     $id('btn-random-characters').addEventListener('click', () => { AU().se('select'); characterSelection.randomize(); });
     $id('btn-confirm-characters').addEventListener('click', confirmCharacters);
     $id('btn-character-back').addEventListener('click', () => { AU().se('select'); UI().showScreen('title'); });
-    $id('btn-howto').addEventListener('click', () => { AU().unlock(); AU().se('select'); UI().showScreen('howto'); });
+    $id('btn-howto').addEventListener('click', () => { AU().unlock(); AU().se('select'); settingsReturn = 'title'; UI().showScreen('howto'); });
+    $id('btn-prep-howto').addEventListener('click', () => { AU().se('select'); settingsReturn = 'character-select'; UI().showScreen('howto'); });
     $id('btn-settings').addEventListener('click', () => {
       AU().unlock(); AU().se('select');
       settingsReturn = 'title';
@@ -131,7 +255,7 @@ const DEBUG_MODE = true;
     document.querySelectorAll('[data-back]').forEach(btn => {
       btn.addEventListener('click', () => {
         AU().se('select');
-        UI().showScreen(settingsReturn === 'game' ? 'game' : 'title');
+        UI().showScreen(settingsReturn === 'game' ? 'game' : settingsReturn === 'character-select' ? 'character-select' : 'title');
         if (settingsReturn === 'game') $id('game-menu').classList.remove('hidden');
         settingsReturn = 'title';
         refreshContinue();

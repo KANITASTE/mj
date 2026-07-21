@@ -38,41 +38,26 @@ window.YM = window.YM || {};
   CU.buildCharacterSelect = function (initialIds) {
     const grid = $id('character-grid');
     let selected = (initialIds || []).filter(id => YM.CHARACTERS[id]).slice(0, 3);
+    const cards = Array.from(grid.querySelectorAll('.prep-opponent'));
 
     function renderSelection() {
-      grid.querySelectorAll('.character-choice').forEach(card => {
-        card.classList.toggle('selected', selected.includes(card.dataset.characterId));
+      cards.forEach(card => {
+        const isSelected = selected.includes(card.dataset.characterId);
+        card.classList.toggle('selected', isSelected);
+        card.setAttribute('aria-pressed', String(isSelected));
       });
       $id('selection-count').textContent = `${selected.length} / 3`;
-      for (let seat = 1; seat <= 3; seat++) {
-        const ch = YM.CHARACTERS[selected[seat - 1]];
-        $id(`selected-seat-${seat}`).textContent = ch ? ch.name : '未選択';
-      }
-      $id('btn-confirm-characters').disabled = selected.length !== 3;
+      document.dispatchEvent(new CustomEvent('ym:opponents-changed', { detail: selected.slice() }));
     }
 
-    grid.innerHTML = '';
-    YM.characterList().forEach(ch => {
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'character-choice';
-      card.dataset.characterId = ch.id;
-      const portrait = document.createElement('div');
-      portrait.className = 'choice-portrait';
-      CU.setPortraitInto(portrait, ch.id, 'normal');
-      const info = document.createElement('div');
-      info.innerHTML = `<div class="choice-name">${ch.name}</div>
-        <div class="choice-meta">${ch.playStyleLabel} ／ ${ch.favoriteYaku}</div>
-        <div class="choice-description">${ch.description}</div>
-        <div class="choice-difficulty">難易度 ${'★'.repeat(ch.difficulty)}${'☆'.repeat(5 - ch.difficulty)}</div>`;
-      card.append(portrait, info);
-      card.addEventListener('click', () => {
-        const pos = selected.indexOf(ch.id);
+    cards.forEach(card => {
+      card.onclick = () => {
+        const id = card.dataset.characterId;
+        const pos = selected.indexOf(id);
         if (pos >= 0) selected.splice(pos, 1);
-        else if (selected.length < 3) selected.push(ch.id);
+        else if (selected.length < 3) selected.push(id);
         renderSelection();
-      });
-      grid.appendChild(card);
+      };
     });
     renderSelection();
     return {
@@ -92,7 +77,13 @@ window.YM = window.YM || {};
   /* 顔アイコン(情報カード用) */
   CU.faceIconHTML = function (charId) {
     const ch = YM.CHARACTERS[charId];
-    if (!ch) return '<div class="face-icon human">私</div>';
+    if (!ch) {
+      const avatar = YM.Storage && YM.Storage.data.playerProfile
+        ? YM.Storage.data.playerProfile.avatar : '';
+      return avatar
+        ? `<div class="face-icon human player-avatar ${avatar}" aria-label="プレイヤーのアバター"></div>`
+        : '<div class="face-icon human">私</div>';
+    }
     if (ch.placeholder || !ch.images || !ch.images.normal) {
       return `<div class="face-icon" style="--accent:${ch.accent}">${ch.initial}</div>`;
     }

@@ -188,8 +188,11 @@ window.YM = window.YM || {};
 
     // 顔アイコンは初回のみ描画
     const face = $id(`card-face-${i}`);
-    if (face && face.dataset.char !== String(p.characterId)) {
-      face.dataset.char = String(p.characterId);
+    const faceKey = p.isHuman
+      ? `human:${YM.Storage.data.playerProfile && YM.Storage.data.playerProfile.avatar || ''}`
+      : String(p.characterId);
+    if (face && face.dataset.char !== faceKey) {
+      face.dataset.char = faceKey;
       face.innerHTML = YM.CharacterUI.faceIconHTML(p.characterId);
     }
 

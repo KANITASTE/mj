@@ -57,6 +57,9 @@ YM.timers = {
       const ch = YM.CHARACTERS[characterId] || YM.characterList()[offset];
       return newPlayer(offset + 1, ch.name, false, ch.id, ch.playStyle || 'balance');
     });
+    const profile = YM.Storage && YM.Storage.data.playerProfile;
+    const playerName = profile && typeof profile.name === 'string' && profile.name.trim()
+      ? profile.name.trim().slice(0, 12) : 'あなた';
     return {
       roundWind: C.EAST,
       handNumber: 1,          // 東n局
@@ -72,7 +75,7 @@ YM.timers = {
       result: null,
       pendingCalls: null,     // 鳴き判定待ちの状態(call-manager管理)
       selectedCharacterIds: selected.slice(),
-      players: [newPlayer(0, 'あなた', true, null, null), ...cpuPlayers],
+      players: [newPlayer(0, playerName, true, null, null), ...cpuPlayers],
       // UI用の一時状態
       selectedIndex: -1,
       riichiMode: false,

@@ -4,6 +4,8 @@ window.YM = window.YM || {};
 
 (function () {
   const KEY = 'yoimachi_mahjong_4p_save_v1';
+  const VALID_CHARACTERS = ['ayano', 'lili', 'masked', 'tanabe', 'tome', 'mofuzo'];
+  const VALID_AVATARS = ['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6'];
   const St = {};
 
   function defaults() {
@@ -12,7 +14,8 @@ window.YM = window.YM || {};
       gamesPlayed: 0,
       intimacy: 0,
       unlockedEvents: [],
-      selectedCharacters: ['lili', 'ayano', 'tome'],
+      selectedCharacters: [],
+      playerProfile: { name: '', avatar: '' },
       settings: { bgm: true, se: true, volume: 60 }
     };
   }
@@ -26,11 +29,20 @@ window.YM = window.YM || {};
       const parsed = JSON.parse(raw);
       St.data = Object.assign(defaults(), parsed);
       if (!Array.isArray(St.data.unlockedEvents)) St.data.unlockedEvents = [];
-      if (!Array.isArray(St.data.selectedCharacters) || St.data.selectedCharacters.length !== 3) {
-        St.data.selectedCharacters = defaults().selectedCharacters;
-      }
+      if (!Array.isArray(St.data.selectedCharacters)) St.data.selectedCharacters = [];
+      St.data.selectedCharacters = St.data.selectedCharacters
+        .filter((id, index, all) => VALID_CHARACTERS.includes(id) && all.indexOf(id) === index)
+        .slice(0, 3);
       if (typeof St.data.intimacy !== 'number') St.data.intimacy = 0;
       St.data.settings = Object.assign(defaults().settings, St.data.settings || {});
+      St.data.settings.bgm = St.data.settings.bgm !== false;
+      St.data.settings.se = St.data.settings.se !== false;
+      const volume = Number(St.data.settings.volume);
+      St.data.settings.volume = Number.isFinite(volume) ? Math.max(0, Math.min(100, Math.round(volume))) : 60;
+      St.data.playerProfile = Object.assign(defaults().playerProfile, St.data.playerProfile || {});
+      St.data.playerProfile.name = typeof St.data.playerProfile.name === 'string'
+        ? St.data.playerProfile.name.trim().slice(0, 12) : '';
+      if (!VALID_AVATARS.includes(St.data.playerProfile.avatar)) St.data.playerProfile.avatar = '';
     } catch (e) {
       St.data = defaults();
     }

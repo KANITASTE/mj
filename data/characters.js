@@ -4,7 +4,7 @@ window.YM = window.YM || {};
 YM.CHARACTERS = {
   ayano: {
     id: 'ayano',
-    name: '神楽坂 綾乃',
+    name: '神楽坂綾乃',
     shortName: '綾乃',
     age: 36,
     job: '銀座の一流クラブのホステス',
@@ -25,7 +25,7 @@ YM.CHARACTERS = {
     }
   },
   lili: {
-    id: 'lili', name: '有栖川 リリ', shortName: 'リリ', age: 32,
+    id: 'lili', name: '有栖川リリ', shortName: 'リリ', age: 32,
     job: 'デイトレーダー兼動画配信者', playStyle: 'balance', playStyleLabel: '効率・特殊手型',
     favoriteYaku: '七対子', difficulty: 3, description: '確率と牌効率に厳しい理詰めの配信者。',
     initial: '莉',
@@ -52,7 +52,7 @@ YM.CHARACTERS = {
     }
   },
   mofuzo: {
-    id: 'mofuzo', name: 'もふ蔵', shortName: 'もふ蔵', age: 20,
+    id: 'mofuzo', name: 'ちいぽん', shortName: 'ちいぽん', age: 20,
     job: '雀荘に住み着く猫', playStyle: 'offense', playStyleLabel: '鳴き・気分屋型',
     favoriteYaku: '対々和', difficulty: 2, description: '人間の麻雀を見続け、肉球で牌を切る普通の老猫。',
     initial: '猫', accent: '#a67c52', imgBase: 'assets/characters/mofuzo/',
@@ -64,7 +64,7 @@ YM.CHARACTERS = {
     }
   },
   tanabe: {
-    id: 'tanabe', name: '田辺 一', shortName: '田辺', age: 31,
+    id: 'tanabe', name: '田辺一', shortName: '田辺', age: 31,
     job: '強度近視の会社員', playStyle: 'balance', playStyleLabel: '門前・覚醒型',
     favoriteYaku: '一気通貫', difficulty: 3, description: '順子を大切にする門前派。勝つほど視界も冴える。',
     initial: '一', accent: '#49637c', imgBase: 'assets/characters/tanabe/',
@@ -76,7 +76,7 @@ YM.CHARACTERS = {
     }
   },
   tome: {
-    id: 'tome', name: '梅沢 トメ', shortName: 'トメ', age: null,
+    id: 'tome', name: '梅沢トメ', shortName: 'トメ', age: null,
     job: '雀荘の名物常連', playStyle: 'defense', playStyleLabel: '守備・実戦型',
     favoriteYaku: '断么九・対々和', difficulty: 4, description: '和やかな笑顔で危険牌をかわす、年季の入った実戦派。',
     initial: 'ト', accent: '#8c4a3d', imgBase: 'assets/characters/tome/',
@@ -89,7 +89,7 @@ YM.CHARACTERS = {
   }
 };
 
-YM.CHARACTER_ORDER = ['ayano', 'lili', 'masked', 'mofuzo', 'tanabe', 'tome'];
+YM.CHARACTER_ORDER = ['ayano', 'lili', 'masked', 'tanabe', 'tome', 'mofuzo'];
 YM.characterList = function () {
   return YM.CHARACTER_ORDER.map(id => YM.CHARACTERS[id]).filter(Boolean);
 };
