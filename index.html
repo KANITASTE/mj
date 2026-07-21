@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宵待ち麻雀倶楽部 Ver.2 - 四人打ち</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Cinzel:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/title.css">
+<link rel="stylesheet" href="css/table.css">
+<link rel="stylesheet" href="css/tiles.css?v=20260721-2">
+<link rel="stylesheet" href="css/character.css?v=20260721-2">
+<link rel="stylesheet" href="css/modal.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== タイトル画面 ===== -->
+  <section id="screen-title" class="screen">
+    <!-- 完成ビジュアルをそのまま表示し、上に透明クリック領域を重ねる -->
+    <div class="title-frame">
+      <img class="title-full-img" src="assets/newtop.png" alt="宵待ち麻雀倶楽部" draggable="false">
+
+      <button id="btn-start" class="title-hotspot hs-start" aria-label="ゲームを始める"></button>
+      <button id="btn-continue" class="title-hotspot hs-continue" aria-label="続きから" disabled></button>
+      <button id="btn-howto" class="title-hotspot hs-howto" aria-label="遊び方"></button>
+      <button id="btn-gallery" class="title-hotspot hs-gallery" aria-label="ギャラリー"></button>
+      <button id="btn-credit" class="title-hotspot hs-credit" aria-label="クレジット"></button>
+      <button id="btn-settings" class="title-hotspot hs-settings" aria-label="設定"></button>
+    </div>
+  </section>
+
+  <!-- ===== 対戦相手選択 ===== -->
+  <section id="screen-character-select" class="screen sub-screen">
+    <div class="sub-panel character-select-panel">
+      <header class="character-select-header">
+        <div><p class="select-kicker">MEMBER SELECTION</p><h2 class="sub-title">今夜の対戦相手</h2><p class="select-help">CPUを3人選び、右席・対面・左席へ配置してください。</p></div>
+        <div id="selection-count" class="selection-count">0 / 3</div>
+      </header>
+      <div id="character-grid" class="character-select-grid" aria-label="キャラクター一覧"></div>
+      <div class="seat-selection">
+        <div class="seat-slot"><span>右席</span><strong id="selected-seat-1">未選択</strong></div>
+        <div class="seat-slot"><span>対面</span><strong id="selected-seat-2">未選択</strong></div>
+        <div class="seat-slot"><span>左席</span><strong id="selected-seat-3">未選択</strong></div>
+      </div>
+      <div class="character-select-actions">
+        <button id="btn-random-characters" class="menu-btn">おまかせ</button>
+        <button id="btn-confirm-characters" class="menu-btn primary" disabled>このメンバーで開始</button>
+        <button id="btn-character-back" class="menu-btn">もどる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 遊び方 ===== -->
+  <section id="screen-howto" class="screen sub-screen">
+    <div class="sub-panel">
+      <h2 class="sub-title">HOW TO PLAY - 遊び方</h2>
+      <div class="howto-body">
+        <ol>
+          <li>日本式の<b>四人打ち麻雀(東風戦)</b>です。持ち点25,000点、東一局〜東四局を戦います。</li>
+          <li><b>牌をクリック</b>して選択、もう一度クリックで<b>捨て</b>ます。</li>
+          <li>3枚組(刻子・順子)を4つと雀頭をそろえ、<b>役</b>のある形で和了(あがり)を目指します。</li>
+          <li>他家の捨て牌に対して<b>ロン・ポン・カン・チー</b>のボタンが点灯します。チーは左の人(上家)からのみ。</li>
+          <li>テンパイしたら<b>リーチ</b>。1,000点を供託して宣言します。</li>
+          <li>山が尽きると流局。ノーテンの人は罰符を支払います。</li>
+          <li>誰かが0点未満になるか東四局が終わると対局終了。<b>1位</b>を目指しましょう。</li>
+        </ol>
+        <p class="howto-note">6人の候補から対戦相手を3人選べます。選んだ順に右席・対面・左席へ座ります。</p>
+      </div>
+      <button class="menu-btn back-btn" data-back>もどる</button>
+    </div>
+  </section>
+
+  <!-- ===== 設定 ===== -->
+  <section id="screen-settings" class="screen sub-screen">
+    <div class="sub-panel">
+      <h2 class="sub-title">SETTINGS - 設定</h2>
+      <div class="settings-body">
+        <div class="setting-row">
+          <span class="setting-label">BGM</span>
+          <button id="set-bgm" class="toggle-btn">ON</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">効果音</span>
+          <button id="set-se" class="toggle-btn">ON</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">音量</span>
+          <input type="range" id="set-volume" min="0" max="100" value="60">
+          <span id="set-volume-val">60</span>
+        </div>
+        <div class="setting-row danger-row">
+          <span class="setting-label">セーブデータ</span>
+          <button id="set-reset" class="toggle-btn danger">初期化</button>
+        </div>
+      </div>
+      <button class="menu-btn back-btn" data-back>もどる</button>
+    </div>
+  </section>
+
+  <!-- ===== ギャラリー ===== -->
+  <section id="screen-gallery" class="screen sub-screen">
+    <div class="sub-panel wide">
+      <h2 class="sub-title">GALLERY - ギャラリー</h2>
+      <div id="gallery-grid" class="gallery-grid"></div>
+      <div id="gallery-viewer" class="gallery-viewer hidden">
+        <div id="gallery-viewer-img"></div>
+        <button class="menu-btn" id="gallery-viewer-close">閉じる</button>
+      </div>
+      <button class="menu-btn back-btn" data-back>もどる</button>
+    </div>
+  </section>
+
+  <!-- ===== クレジット ===== -->
+  <section id="screen-credit" class="screen sub-screen">
+    <div class="sub-panel">
+      <h2 class="sub-title">CREDIT</h2>
+      <div class="credit-body">
+        <p>宵待ち麻雀倶楽部 Ver.2 (四人打ち・試作版)</p>
+        <p>企画・開発:あなた</p>
+        <p>プログラム協力:Claude Code</p>
+        <p class="credit-small">本作はフィクションです。登場する人物・団体は実在のものと関係ありません。<br>登場人物は全員20歳以上です。</p>
+      </div>
+      <button class="menu-btn back-btn" data-back>もどる</button>
+    </div>
+  </section>
+
+  <!-- ===== 対局画面 ===== -->
+  <section id="screen-game" class="screen">
+    <div id="game-frame">
+
+      <!-- 上段: 上家CPU(綾乃) -->
+      <div id="area-top">
+        <div class="hand-row" id="hand-2"></div>
+        <div class="meld-row" id="melds-2"></div>
+      </div>
+
+      <!-- 中段 -->
+      <div id="area-mid">
+        <!-- 左家CPU -->
+        <div id="area-left">
+          <div class="hand-col" id="hand-3"></div>
+          <div class="meld-row v" id="melds-3"></div>
+        </div>
+
+        <!-- 卓中央 -->
+        <div id="center-zone">
+          <div class="river river-top" id="river-2"></div>
+          <div id="center-row">
+            <div class="river river-left" id="river-3"></div>
+            <div id="center-plate">
+              <div class="turn-arrow top" id="turn-arrow-2">西</div>
+              <div id="plate-mid">
+                <div class="turn-arrow left" id="turn-arrow-3">北</div>
+                <div id="plate-core">
+                  <div id="plate-kyoku" class="gold-plate">東一局</div>
+                  <div class="plate-row">
+                    <span id="plate-honba">0本場</span>
+                    <span id="plate-sticks">供託 0</span>
+                  </div>
+                  <div id="plate-wall" class="pixel-label">山 70</div>
+                  <div id="plate-dora-wrap">
+                    <span class="pixel-label">ドラ</span>
+                    <div id="plate-dora"></div>
+                  </div>
+                </div>
+                <div class="turn-arrow right" id="turn-arrow-1">南</div>
+              </div>
+              <div class="turn-arrow bottom" id="turn-arrow-0">東</div>
+            </div>
+            <div class="river river-right" id="river-1"></div>
+          </div>
+          <div class="river river-bottom" id="river-0"></div>
+        </div>
+
+        <!-- 右家CPU -->
+        <div id="area-right">
+          <div class="hand-col" id="hand-1"></div>
+          <div class="meld-row v" id="melds-1"></div>
+        </div>
+      </div>
+
+      <!-- 下段: プレイヤー -->
+      <div id="area-bottom">
+        <div id="player-center">
+          <div id="player-hand-wrap">
+            <div id="player-hand"></div>
+            <div id="player-tsumo"></div>
+            <div class="meld-row" id="melds-0"></div>
+          </div>
+          <div id="action-bar">
+            <button id="btn-chi" class="action-btn hidden">チー</button>
+            <button id="btn-pon" class="action-btn hidden">ポン</button>
+            <button id="btn-minkan" class="action-btn hidden">カン</button>
+            <button id="btn-kan" class="action-btn hidden">カン</button>
+            <button id="btn-riichi" class="action-btn hidden">リーチ</button>
+            <button id="btn-tsumo" class="action-btn hidden">ツモ</button>
+            <button id="btn-ron" class="action-btn hidden">ロン</button>
+            <button id="btn-pass" class="action-btn hidden">パス</button>
+            <button id="btn-menu" class="action-btn sub">メニュー</button>
+          </div>
+          <div id="info-guide"></div>
+        </div>
+      </div>
+
+      <!-- 卓内の4人情報カード（添付レイアウトの四象限配置） -->
+      <div id="table-player-cards">
+        <div class="info-card table-seat-card" id="card-3">
+          <div class="card-face" id="card-face-3"></div>
+          <div class="card-body">
+            <div class="card-top"><span class="card-wind" id="card-wind-3">北</span><span class="card-name" id="card-name-3">左家</span><span class="dealer-mark hidden" id="card-dealer-3">親</span></div>
+            <div class="card-bottom"><span class="card-score" id="card-score-3">25000</span><span class="card-rank" id="card-rank-3">1位</span><span class="riichi-chip hidden" id="card-riichi-3">立直</span></div>
+            <div class="card-line" id="card-line-3"></div>
+          </div>
+        </div>
+        <div class="info-card table-seat-card" id="card-2">
+          <div class="card-face" id="card-face-2"></div>
+          <div class="card-body">
+            <div class="card-top"><span class="card-wind" id="card-wind-2">西</span><span class="card-name" id="card-name-2">対面</span><span class="dealer-mark hidden" id="card-dealer-2">親</span></div>
+            <div class="card-bottom"><span class="card-score" id="card-score-2">25000</span><span class="card-rank" id="card-rank-2">1位</span><span class="riichi-chip hidden" id="card-riichi-2">立直</span></div>
+            <div class="card-line" id="card-line-2"></div>
+          </div>
+        </div>
+        <div class="info-card table-seat-card" id="card-0">
+          <div class="card-face" id="card-face-0"></div>
+          <div class="card-body">
+            <div class="card-top"><span class="card-wind" id="card-wind-0">東</span><span class="card-name" id="card-name-0">あなた</span><span class="dealer-mark hidden" id="card-dealer-0">親</span></div>
+            <div class="card-bottom"><span class="card-score" id="card-score-0">25000</span><span class="card-rank" id="card-rank-0">1位</span><span class="riichi-chip hidden" id="card-riichi-0">立直</span></div>
+            <div class="card-line" id="card-line-0"></div>
+          </div>
+        </div>
+        <div class="info-card table-seat-card" id="card-1">
+          <div class="card-face" id="card-face-1"></div>
+          <div class="card-body">
+            <div class="card-top"><span class="card-wind" id="card-wind-1">南</span><span class="card-name" id="card-name-1">右家</span><span class="dealer-mark hidden" id="card-dealer-1">親</span></div>
+            <div class="card-bottom"><span class="card-score" id="card-score-1">25000</span><span class="card-rank" id="card-rank-1">1位</span><span class="riichi-chip hidden" id="card-riichi-1">立直</span></div>
+            <div class="card-line" id="card-line-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- チー候補選択 -->
+      <div id="chi-select" class="hidden">
+        <div class="chi-title">チーする組み合わせを選択</div>
+        <div id="chi-select-list"></div>
+        <button id="chi-select-cancel" class="menu-btn">やめる</button>
+      </div>
+
+      <!-- 演出レイヤー -->
+      <div id="fx-layer"></div>
+      <div id="cutin-layer"></div>
+      <div id="announcement-layer" aria-live="assertive"></div>
+
+      <!-- 対局開始時の3人挨拶 -->
+      <div id="start-greeting-layer" class="hidden" aria-live="polite">
+        <div class="start-greeting-panel">
+          <p class="start-greeting-kicker">TONIGHT'S PLAYERS</p>
+          <h2>今夜も、よろしくお願いします</h2>
+          <div id="start-greeting-cards"></div>
+          <button id="start-greeting-close" class="menu-btn primary">東一局を始める</button>
+        </div>
+      </div>
+
+      <!-- ゲーム内メニュー -->
+      <div id="game-menu" class="overlay hidden">
+        <div class="overlay-panel">
+          <h3>MENU</h3>
+          <button class="menu-btn" id="gm-resume">対局に戻る</button>
+          <button class="menu-btn" id="gm-settings">設定</button>
+          <button class="menu-btn" id="gm-title">タイトルへ戻る</button>
+        </div>
+      </div>
+
+      <!-- 親決め(卓上サイコロ。全面パネルは出さず卓上に配置) -->
+      <div id="oyakime-layer" class="hidden">
+        <div id="oya-die-0" class="oya-die" aria-hidden="true">
+          <div class="oya-die-shadow"></div><div class="oya-die-lift"><div class="oya-die-cube"></div></div>
+        </div>
+        <div id="oya-die-1" class="oya-die" aria-hidden="true">
+          <div class="oya-die-shadow"></div><div class="oya-die-lift"><div class="oya-die-cube"></div></div>
+        </div>
+        <div id="oyakime-msg"></div>
+        <button id="oyakime-roll" class="menu-btn">サイコロを振る</button>
+      </div>
+
+      <!-- 局結果オーバーレイ -->
+      <div id="result-overlay" class="overlay hidden">
+        <div class="overlay-panel result-panel">
+          <div id="result-banner"></div>
+          <div id="result-hand"></div>
+          <div id="result-yaku-list"></div>
+          <div id="result-score"></div>
+          <div id="result-deltas"></div>
+          <button class="menu-btn" id="result-next">つづける</button>
+        </div>
+      </div>
+
+      <!-- 最終結果オーバーレイ -->
+      <div id="final-overlay" class="overlay hidden">
+        <div class="overlay-panel result-panel">
+          <div id="final-title"></div>
+          <div id="final-ranking"></div>
+          <div class="final-buttons">
+            <button class="menu-btn hidden" id="final-event">勝利イベント</button>
+            <button class="menu-btn" id="final-rematch">もう一度対局</button>
+            <button class="menu-btn" id="final-title-btn">タイトルへ戻る</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 勝利イベント ===== -->
+  <section id="screen-event" class="screen">
+    <div id="event-bg"></div>
+    <div id="event-char"></div>
+    <div id="event-ui">
+      <div id="event-textbox">
+        <div id="event-name">綾乃</div>
+        <div id="event-text"></div>
+        <div id="event-next-mark">▼</div>
+      </div>
+      <div id="event-choices" class="hidden">
+        <button class="menu-btn" id="ev-rematch">もう一度対局</button>
+        <button class="menu-btn" id="ev-title">タイトルへ戻る</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- スマホ用案内 -->
+  <div id="mobile-block" class="hidden">
+    <p>本ゲームはPCまたは横向きのタブレットでお楽しみください。</p>
+  </div>
+
+  <!-- DEVボタン -->
+  <button id="dev-toggle">DEV</button>
+  <div id="dev-panel" class="hidden">
+    <h4>DEBUG (4P)</h4>
+    <button data-dev="hands">全員の手牌を見る</button>
+    <button data-dev="tenpai0">あなたをテンパイに</button>
+    <button data-dev="tenpai1">右CPUをテンパイに</button>
+    <button data-dev="tenpai2">綾乃をテンパイに</button>
+    <button data-dev="tenpai3">左CPUをテンパイに</button>
+    <button data-dev="winnable">あなたをツモ可能に</button>
+    <button data-dev="dealin1">右CPUに振り込ませる</button>
+    <button data-dev="dealin2">綾乃に振り込ませる</button>
+    <button data-dev="dealin3">左CPUに振り込ませる</button>
+    <button data-dev="riichi">リーチ可能状態</button>
+    <button data-dev="chi">チー可能状態</button>
+    <button data-dev="pon">ポン可能状態</button>
+    <button data-dev="kan">カン可能状態</button>
+    <button data-dev="ryuukyoku">流局直前(山5枚)</button>
+    <button data-dev="east4">東四局へ</button>
+    <button data-dev="scores">点数を変更</button>
+    <button data-dev="dealer">親を変更</button>
+    <button data-dev="honba">供託・本場を変更</button>
+    <button data-dev="auto">オートプレイ切替</button>
+    <button data-dev="log">CPU思考ログ</button>
+  </div>
+  <pre id="dev-log" class="hidden"></pre>
+
+  <!-- 室内の空気感 -->
+  <div id="crt-overlay"></div>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="data/characters.js"></script>
+<script src="data/dialogues.js?v=20260721-2"></script>
+<script src="js/mahjong/tiles.js"></script>
+<script src="js/mahjong/wall.js"></script>
+<script src="js/mahjong/hand-analyzer.js"></script>
+<script src="js/mahjong/fu.js"></script>
+<script src="js/mahjong/yaku.js"></script>
+<script src="js/mahjong/scoring.js"></script>
+<script src="js/cpu/tile-danger.js"></script>
+<script src="js/cpu/cpu-base.js"></script>
+<script src="js/cpu/cpu-offense.js"></script>
+<script src="js/cpu/cpu-balance.js"></script>
+<script src="js/cpu/cpu-defense.js"></script>
+<script src="js/audio/audio.js"></script>
+<script src="js/storage/storage.js"></script>
+<script src="js/ui/dialogue.js"></script>
+<script src="js/ui/animation.js?v=20260721-2"></script>
+<script src="js/ui/character-ui.js?v=20260721-3"></script>
+<script src="js/ui/render.js"></script>
+<script src="js/ui/result-ui.js"></script>
+<script src="js/ui/dev-panel.js?v=20260721-2"></script>
+<script src="js/game/game-state.js?v=20260721-2"></script>
+<script src="js/game/round-manager.js"></script>
+<script src="js/game/turn-manager.js?v=20260721-2"></script>
+<script src="js/game/call-manager.js"></script>
+<script src="js/game/result-manager.js?v=20260721-2"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

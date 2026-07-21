@@ -1,0 +1,166 @@
+/* game-state.js - ゲーム状態の一元管理(4人麻雀版)
+ * DOMを状態として使わない。UIは常にこの状態から描画する。 */
+window.YM = window.YM || {};
+
+/* ===== タイマー一元管理(画面遷移時に必ず破棄する) ===== */
+YM.timers = {
+  list: [],
+  set(fn, ms) {
+    const id = setTimeout(() => {
+      this.list = this.list.filter(x => x !== id);
+      fn();
+    }, ms);
+    this.list.push(id);
+    return id;
+  },
+  clearAll() {
+    this.list.forEach(id => clearTimeout(id));
+    this.list = [];
+  }
+};
+
+(function () {
+  const A = () => YM.Analyzer;
+  const C = YM.CONST;
+
+  const GS = {};
+
+  function newPlayer(id, name, isHuman, characterId, cpuProfile) {
+    return {
+      id,                    // 0-3(席順。0=下=人間、1=右、2=上、3=左)
+      name,
+      isHuman,
+      characterId,
+      cpuProfile,            // 'offense' | 'balance' | 'defense' | null
+      seatWind: 27,          // 局開始時に更新
+      score: C.START_SCORE,
+      hand: [],              // 手牌(ツモ牌除く)
+      drawnTile: null,
+      discards: [],          // 河 [{tile, riichiDecl, tsumogiri, called}]
+      melds: [],             // 副露 [{type, tile, tiles, from, calledTile}]
+      isRiichi: false,
+      riichiPending: false,  // 宣言牌が通るまでの仮状態
+      riichiTurn: -1,        // リーチ宣言時の自分の捨て牌数
+      isFuriten: false,      // 永続フリテン(自分の河 or リーチ後見逃し)
+      temporaryFuriten: false, // 同巡内フリテン(次の自分のツモで解除)
+      ippatsuEligible: false,
+      hasDiscarded: false,
+      waits: []              // 現在の待ち牌キャッシュ
+    };
+  }
+
+  /* ゲーム全体の状態 */
+  GS.create = function (selectedCharacterIds) {
+    const selected = Array.isArray(selectedCharacterIds) && selectedCharacterIds.length === 3
+      ? selectedCharacterIds : YM.defaultCharacterSelection;
+    const cpuPlayers = selected.map((characterId, offset) => {
+      const ch = YM.CHARACTERS[characterId] || YM.characterList()[offset];
+      return newPlayer(offset + 1, ch.name, false, ch.id, ch.playStyle || 'balance');
+    });
+    return {
+      roundWind: C.EAST,
+      handNumber: 1,          // 東n局
+      dealerIndex: 0,
+      currentPlayerIndex: 0,
+      turnNumber: 0,
+      honba: 0,
+      riichiSticks: 0,        // 供託(本)
+      wall: null,             // YM.Wall.build() の戻り値
+      lastDiscard: null,      // {tile, player}
+      lastDiscardPlayer: -1,
+      phase: C.PHASE.IDLE,
+      result: null,
+      pendingCalls: null,     // 鳴き判定待ちの状態(call-manager管理)
+      selectedCharacterIds: selected.slice(),
+      players: [newPlayer(0, 'あなた', true, null, null), ...cpuPlayers],
+      // UI用の一時状態
+      selectedIndex: -1,
+      riichiMode: false,
+      riichiValidKinds: [],
+      humanOptions: null,     // {tsumo, riichi, ankanKinds, kakanKinds}
+      busy: false,
+      // DEV
+      devShowHands: false,
+      devAutoPlay: false,
+      devForcedDiscard: {},   // {playerIndex: kind} 次の打牌を強制
+      cpuLog: [],
+      gameOver: false,
+      dialogueState: {
+        totalTurns: 0,
+        thinkingTarget: 1 + Math.floor(Math.random() * 2),
+        thinkingShown: 0,
+        nextThinkingTurn: 24 + Math.floor(Math.random() * 42),
+        lastAmbientTurn: -20,
+        liliSmokingShown: false,
+        liliSmokingTurn: 48 + Math.floor(Math.random() * 38)
+      }
+    };
+  };
+
+  /* ===== ヘルパー ===== */
+  GS.sortHand = function (hand) {
+    hand.sort((a, b) => a.kind - b.kind || a.id - b.id);
+  };
+
+  GS.seatWindOf = function (G, idx) {
+    return YM.seat.windOf(idx, G.dealerIndex);
+  };
+
+  GS.isDealer = (G, idx) => idx === G.dealerIndex;
+
+  /* 役判定に渡す共通コンテキスト */
+  GS.ctxFor = function (G, idx, flags) {
+    const p = G.players[idx];
+    return Object.assign({
+      tsumo: false,
+      riichi: p.isRiichi,
+      ippatsu: p.isRiichi && p.ippatsuEligible,
+      rinshan: false, haitei: false, houtei: false, chankan: false,
+      seatWind: p.seatWind,
+      roundWind: G.roundWind,
+      doraKinds: YM.Wall.doraKinds(G.wall)
+    }, flags || {});
+  };
+
+  /* あるプレイヤーから見えている牌のcounts(受け入れ計算用) */
+  GS.visibleCounts = function (G, idx) {
+    const c = new Array(34).fill(0);
+    const add = t => { if (t) c[t.kind]++; };
+    const p = G.players[idx];
+    p.hand.forEach(add);
+    add(p.drawnTile);
+    for (const q of G.players) {
+      q.discards.forEach(d => add(d.tile));
+      for (const m of q.melds) m.tiles.forEach(add);
+    }
+    G.wall.doraIndicators.forEach(add);
+    return c;
+  };
+
+  /* 待ち牌キャッシュとフリテンの更新(手牌13枚時に呼ぶ) */
+  GS.updateWaits = function (G, idx) {
+    const p = G.players[idx];
+    const counts = A().toCounts(p.hand);
+    p.waits = A().waitingTiles(counts, p.melds.length);
+    // 自分の河に待ち牌があれば永続フリテン
+    const riverFuriten = p.waits.some(w => p.discards.some(d => d.tile.kind === w));
+    // リーチ後見逃しフリテンは riichiMissedRon フラグで別管理
+    p.isFuriten = riverFuriten || !!p.riichiMissedRon;
+  };
+
+  /* 全体の点数順位(1-4)。同点は起家に近い方が上位 */
+  GS.ranks = function (G) {
+    const order = G.players.map((p, i) => ({ i, score: p.score }))
+      .sort((a, b) => b.score - a.score || a.i - b.i);
+    const ranks = new Array(4);
+    order.forEach((o, r) => { ranks[o.i] = r + 1; });
+    return ranks;
+  };
+
+  GS.log = function (G, idx, text) {
+    G.cpuLog.push(`[${G.turnNumber}] ${G.players[idx].name}: ${text}`);
+    if (G.cpuLog.length > 200) G.cpuLog.splice(0, G.cpuLog.length - 200);
+  };
+
+  YM.GameState = GS;
+})();

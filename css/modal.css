@@ -1,0 +1,188 @@
+/* modal.css - 局結果・最終結果・ゲーム内メニュー */
+
+/* ===== 親決め(卓上サイコロ) ===== */
+#oyakime-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 25;              /* 卓の上・結果オーバーレイより下 */
+  pointer-events: none;     /* サイコロには触れない。ボタンだけ有効 */
+}
+#oyakime-msg {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 104px);
+  transform: translateX(-50%);
+  font-family: var(--ui-font);
+  font-size: 15px;
+  color: var(--gold-bright);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+#oyakime-roll {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  min-width: 220px;
+}
+/* 卓上を移動する外枠。高さと回転は子要素で独立させる */
+.oya-die {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  opacity: 0;
+  perspective: 360px;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+.oya-die-shadow {
+  position: absolute; left: 4px; top: 38px; width: 40px; height: 15px;
+  border-radius: 50%; background: rgba(0, 0, 0, 0.58); filter: blur(5px);
+  transform-origin: center; will-change: transform, opacity;
+}
+.oya-die-lift {
+  position: absolute; inset: 0; transform: rotateX(12deg) rotateY(8deg);
+  transform-style: preserve-3d; will-change: transform;
+}
+.oya-die-cube {
+  position: absolute; left: 2px; top: 2px; width: 44px; height: 44px;
+  transform-style: preserve-3d; will-change: transform;
+}
+.oya-die-face {
+  position: absolute; inset: 0; box-sizing: border-box;
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  padding: 6px; border: 1px solid #c9c0aa; border-radius: 7px;
+  background: linear-gradient(145deg, #fff 0%, #f5f1e7 62%, #ddd3bf 100%);
+  box-shadow: inset 0 1px 2px #fff, inset 0 -2px 3px rgba(90,70,35,.2);
+  backface-visibility: hidden;
+}
+.oya-die-face[data-side="front"] { transform: translateZ(22px); }
+.oya-die-face[data-side="back"] { transform: rotateY(180deg) translateZ(22px); }
+.oya-die-face[data-side="right"] { transform: rotateY(90deg) translateZ(22px); }
+.oya-die-face[data-side="left"] { transform: rotateY(-90deg) translateZ(22px); }
+.oya-die-face[data-side="top"] { transform: rotateX(90deg) translateZ(22px); }
+.oya-die-face[data-side="bottom"] { transform: rotateX(-90deg) translateZ(22px); }
+.oya-pip {
+  width: 7px; height: 7px; place-self: center; border-radius: 50%; background: #292724;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.65);
+}
+.oya-pip.red { background: #b22e35; }
+.oya-pip.p1 { grid-area: 1 / 1; } .oya-pip.p2 { grid-area: 1 / 3; }
+.oya-pip.p3 { grid-area: 2 / 1; } .oya-pip.p4 { grid-area: 2 / 2; }
+.oya-pip.p5 { grid-area: 2 / 3; } .oya-pip.p6 { grid-area: 3 / 1; }
+.oya-pip.p7 { grid-area: 3 / 3; }
+/* 仮親・本親に決まった席の情報カードを強調 */
+.info-card.oya-picked {
+  border-color: var(--gold-bright);
+  animation: oya-glow 0.5s ease-in-out 4;
+}
+@keyframes oya-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(214, 178, 106, 0.4); }
+  50% { box-shadow: 0 0 24px rgba(214, 178, 106, 0.95); }
+}
+
+.result-panel { min-width: 540px; max-width: 760px; }
+
+#result-banner, #final-title {
+  font-family: var(--serif-jp);
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  background: linear-gradient(175deg, #f2e3b8 10%, var(--champagne) 45%, #9c7a3e 70%, #e6cf96 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.9)) drop-shadow(0 0 22px rgba(214, 178, 106, 0.35));
+  text-align: center;
+}
+
+#result-hand {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0;
+}
+.result-meld-gap { width: 12px; }
+
+#result-yaku-list {
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 320px;
+  font-family: var(--serif-jp);
+  font-size: 15px;
+}
+.yaku-row {
+  display: flex; justify-content: space-between;
+  border-bottom: 1px solid rgba(176, 141, 74, 0.18);
+  padding: 3px 8px;
+  opacity: 0;
+  animation: yaku-in 0.3s forwards;
+}
+.yaku-row span:last-child { color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+@keyframes yaku-in { from { transform: translateX(-16px); } to { opacity: 1; } }
+
+#result-score {
+  font-family: var(--serif-jp);
+  font-weight: 700;
+  font-size: 24px;
+  color: #d08a94;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 18px rgba(160, 48, 64, 0.35);
+  letter-spacing: 0.1em;
+  margin-top: 6px;
+}
+#result-score .score-rank { color: var(--gold-bright); margin-right: 16px; }
+
+#result-deltas, #final-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 340px;
+  font-family: var(--ui-font);
+  font-size: 13px;
+}
+.delta-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px;
+  gap: 10px;
+  padding: 3px 8px;
+  border-bottom: 1px solid rgba(176, 141, 74, 0.12);
+  color: #cfc5ae;
+}
+.delta-row span:nth-child(2) { text-align: right; font-variant-numeric: tabular-nums; }
+.delta-row span:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; color: var(--gold-bright); }
+.delta-row .plus { color: #8fc98f; }
+.delta-row .minus { color: #d08a94; }
+
+/* 最終結果 */
+.final-row {
+  display: grid;
+  grid-template-columns: 54px 1fr 110px 90px;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(176, 141, 74, 0.18);
+  font-family: var(--serif-jp);
+  font-size: 16px;
+  color: var(--ivory);
+}
+.final-row.me {
+  background: rgba(230, 207, 150, 0.06);
+  border: 1px solid rgba(214, 178, 106, 0.4);
+  border-radius: 2px;
+}
+.final-rank {
+  font-family: var(--serif-jp);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--gold-bright);
+}
+.final-row:first-child .final-rank { color: #f2e3b8; text-shadow: 0 0 12px rgba(214,178,106,0.6); }
+.final-score { text-align: right; font-variant-numeric: tabular-nums; }
+.final-pt { text-align: right; font-family: var(--latin); font-size: 13px; color: #b7ac97; }
+.final-buttons { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
