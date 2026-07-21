@@ -13,6 +13,7 @@ const DEBUG_MODE = true;
   const Main = {};
   let characterSelection = null;
   let selectedAvatar = '';
+  const prepTouchedSettings = new Set();
 
   Main.goTitle = function () {
     YM.timers.clearAll();
@@ -31,9 +32,9 @@ const DEBUG_MODE = true;
   function startGame() {
     AU().unlock();
     AU().se('decide');
-    const saved = St().data.selectedCharacters || [];
-    characterSelection = YM.CharacterUI.buildCharacterSelect(saved);
-    refreshProfileUI();
+    resetPrepInteractionState();
+    characterSelection = YM.CharacterUI.buildCharacterSelect([]);
+    refreshProfileUI(true);
     refreshPrepSettingsUI();
     updatePrepReady();
     UI().showScreen('character-select');
@@ -60,10 +61,10 @@ const DEBUG_MODE = true;
   }
 
   /* ===== GAME START準備画面 ===== */
-  function refreshProfileUI() {
+  function refreshProfileUI(clearAvatar) {
     const profile = St().data.playerProfile || { name: '', avatar: '' };
     $id('player-name').value = profile.name || '';
-    selectedAvatar = profile.avatar || '';
+    selectedAvatar = clearAvatar ? '' : (profile.avatar || '');
     renderAvatarSelection();
     $id('profile-error').textContent = '';
   }
@@ -91,18 +92,27 @@ const DEBUG_MODE = true;
   function refreshPrepSettingsUI() {
     if (!$id('prep-volume')) return;
     const s = St().data.settings;
-    const setOption = (id, selected) => {
+    const setOption = (id, selected, key) => {
       const el = $id(id);
-      el.classList.toggle('selected', selected);
+      const touched = prepTouchedSettings.has(key);
+      el.classList.toggle('selected', touched && selected);
+      el.classList.toggle('touched', touched);
       el.setAttribute('aria-pressed', String(selected));
     };
-    setOption('prep-bgm-on', s.bgm);
-    setOption('prep-bgm-off', !s.bgm);
-    setOption('prep-se-on', s.se);
-    setOption('prep-se-off', !s.se);
+    setOption('prep-bgm-on', s.bgm, 'bgm');
+    setOption('prep-bgm-off', !s.bgm, 'bgm');
+    setOption('prep-se-on', s.se, 'se');
+    setOption('prep-se-off', !s.se, 'se');
     $id('prep-volume').value = s.volume;
     $id('prep-volume-value').value = `${s.volume}%`;
     $id('prep-volume-value').textContent = `${s.volume}%`;
+    document.querySelector('.prep-stage').classList.toggle('volume-touched', prepTouchedSettings.has('volume'));
+  }
+
+  function resetPrepInteractionState() {
+    prepTouchedSettings.clear();
+    const stage = document.querySelector('.prep-stage');
+    if (stage) stage.classList.remove('volume-touched');
   }
 
   function resetSaveData() {
@@ -110,6 +120,7 @@ const DEBUG_MODE = true;
     St().reset();
     St().save();
     applyAudioSettings();
+    resetPrepInteractionState();
     refreshSettingsUI();
     refreshProfileUI();
     characterSelection = YM.CharacterUI.buildCharacterSelect([]);
@@ -155,6 +166,7 @@ const DEBUG_MODE = true;
     });
 
     const setAudio = (key, value) => {
+      prepTouchedSettings.add(key);
       St().data.settings[key] = value;
       St().save();
       applyAudioSettings();
@@ -165,7 +177,14 @@ const DEBUG_MODE = true;
     $id('prep-bgm-off').addEventListener('click', () => setAudio('bgm', false));
     $id('prep-se-on').addEventListener('click', () => setAudio('se', true));
     $id('prep-se-off').addEventListener('click', () => setAudio('se', false));
+    const revealVolume = () => {
+      prepTouchedSettings.add('volume');
+      refreshPrepSettingsUI();
+    };
+    $id('prep-volume').addEventListener('pointerdown', revealVolume);
+    $id('prep-volume').addEventListener('focus', revealVolume);
     $id('prep-volume').addEventListener('input', e => {
+      prepTouchedSettings.add('volume');
       St().data.settings.volume = parseInt(e.target.value, 10);
       St().save();
       applyAudioSettings();
