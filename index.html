@@ -11,11 +11,11 @@
 <link rel="stylesheet" href="css/common.css">
 <link rel="stylesheet" href="css/title.css">
 <link rel="stylesheet" href="css/game-start.css?v=20260722-3">
-<link rel="stylesheet" href="css/table.css?v=20260722-stage1">
+<link rel="stylesheet" href="css/table.css?v=20260722-layout-fix">
 <link rel="stylesheet" href="css/tiles.css?v=20260722-stage1">
 <link rel="stylesheet" href="css/character.css?v=20260721-2">
 <link rel="stylesheet" href="css/modal.css">
-<link rel="stylesheet" href="css/responsive.css?v=20260722-stage1">
+<link rel="stylesheet" href="css/responsive.css?v=20260722-layout-fix">
 </head>
 <body>
 <div id="app">
@@ -226,13 +226,13 @@
             <div class="meld-row" id="melds-0"></div>
           </div>
           <div id="action-bar">
-            <button id="btn-chi" class="action-btn hidden" aria-label="チー">チー</button>
-            <button id="btn-pon" class="action-btn hidden" aria-label="ポン">ポン</button>
-            <button id="btn-minkan" class="action-btn hidden" aria-label="カン">カン</button>
-            <button id="btn-kan" class="action-btn hidden" aria-label="カン">カン</button>
-            <button id="btn-riichi" class="action-btn hidden" aria-label="リーチ">リーチ</button>
-            <button id="btn-tsumo" class="action-btn hidden" aria-label="ツモ">ツモ</button>
-            <button id="btn-ron" class="action-btn hidden" aria-label="ロン">ロン</button>
+            <button id="btn-chi" class="action-btn action-slot" aria-label="チー（現在は選択できません）" aria-disabled="true" disabled>チー</button>
+            <button id="btn-pon" class="action-btn action-slot" aria-label="ポン（現在は選択できません）" aria-disabled="true" disabled>ポン</button>
+            <button id="btn-minkan" class="action-btn hidden" aria-label="カン" tabindex="-1">カン</button>
+            <button id="btn-kan" class="action-btn action-slot" aria-label="カン（現在は選択できません）" aria-disabled="true" disabled>カン</button>
+            <button id="btn-riichi" class="action-btn action-slot" aria-label="リーチ（現在は選択できません）" aria-disabled="true" disabled>リーチ</button>
+            <button id="btn-tsumo" class="action-btn action-slot" aria-label="ツモ（現在は選択できません）" aria-disabled="true" disabled>ツモ</button>
+            <button id="btn-ron" class="action-btn action-slot" aria-label="ロン（現在は選択できません）" aria-disabled="true" disabled>ロン</button>
             <button id="btn-pass" class="action-btn hidden">パス</button>
             <button id="btn-menu" class="action-btn sub">メニュー</button>
           </div>
@@ -419,7 +419,7 @@
 <script src="js/ui/dialogue.js?v=20260722-2"></script>
 <script src="js/ui/animation.js?v=20260722-stage1"></script>
 <script src="js/ui/character-ui.js?v=20260722-4"></script>
-<script src="js/ui/render.js?v=20260722-stage1"></script>
+<script src="js/ui/render.js?v=20260722-layout-fix"></script>
 <script src="js/ui/result-ui.js"></script>
 <script src="js/ui/dev-panel.js?v=20260721-2"></script>
 <script src="js/game/game-state.js?v=20260722-3"></script>
@@ -427,6 +427,6 @@
 <script src="js/game/turn-manager.js?v=20260721-2"></script>
 <script src="js/game/call-manager.js"></script>
 <script src="js/game/result-manager.js?v=20260721-2"></script>
-<script src="js/main.js?v=20260722-3"></script>
+<script src="js/main.js?v=20260722-layout-fix"></script>
 </body>
 </html>

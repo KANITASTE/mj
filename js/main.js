@@ -295,7 +295,13 @@ const DEBUG_MODE = true;
     // 対局中の操作ボタン
     $id('btn-riichi').addEventListener('click', () => YM.Turn.onRiichiButton());
     $id('btn-tsumo').addEventListener('click', () => YM.Turn.onTsumoButton());
-    $id('btn-kan').addEventListener('click', () => YM.Turn.onKanButton());
+    $id('btn-kan').addEventListener('click', () => {
+      const g = YM.Game.G;
+      const pending = g && g.phase === 'calls' && g.pendingCalls;
+      const myCall = pending && pending.options && pending.options.find(option => option.player === 0);
+      if (myCall && myCall.minkan) YM.Calls.onHumanDecision({ type: 'kan' });
+      else YM.Turn.onKanButton();
+    });
     $id('btn-ron').addEventListener('click', () => {
       const g = YM.Game.G;
       if (g && g.pendingCalls && g.pendingCalls.mode === 'chankan') YM.Calls.onHumanChankan(true);

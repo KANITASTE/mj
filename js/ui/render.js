@@ -225,23 +225,39 @@ window.YM = window.YM || {};
       el.classList.toggle('hidden', !on);
       el.classList.toggle('glow', !!glow);
     };
+    const setAction = (id, available, label) => {
+      const el = $id(id);
+      const enabled = !!available;
+      el.classList.remove('hidden');
+      el.classList.toggle('is-available', enabled);
+      el.classList.toggle('glow', enabled);
+      el.disabled = !enabled;
+      el.setAttribute('aria-disabled', String(!enabled));
+      el.setAttribute('aria-label', enabled ? label : `${label}（現在は選択できません）`);
+    };
     const o = G.humanOptions;
     const humanTurn = G.phase === C.PHASE.HUMAN_TURN && !G.busy;
     const pc = G.pendingCalls;
     const calling = G.phase === C.PHASE.CALLS && pc;
     const myCall = calling ? pc.options.find(x => x.player === 0) : null;
 
-    show('btn-tsumo', humanTurn && o && !!o.tsumo, true);
-    show('btn-riichi', humanTurn && o && o.riichiKinds && o.riichiKinds.length > 0 && !G.players[0].isRiichi, !G.riichiMode);
-    $id('btn-riichi').textContent = G.riichiMode ? 'やめる' : 'リーチ';
-    $id('btn-riichi').setAttribute('aria-label', G.riichiMode ? 'リーチ選択をやめる' : 'リーチ');
-    $id('btn-riichi').classList.toggle('is-cancel', !!G.riichiMode);
-    show('btn-kan', humanTurn && o && ((o.ankanKinds && o.ankanKinds.length > 0) || (o.kakanKinds && o.kakanKinds.length > 0)), false);
+    const canTsumo = humanTurn && o && !!o.tsumo;
+    const canRiichi = !!G.riichiMode || (humanTurn && o && o.riichiKinds && o.riichiKinds.length > 0 && !G.players[0].isRiichi);
+    const canKan = (humanTurn && o && ((o.ankanKinds && o.ankanKinds.length > 0) || (o.kakanKinds && o.kakanKinds.length > 0))) ||
+      (calling && myCall && !!myCall.minkan);
+    const canRon = calling && myCall && !!myCall.ron;
+    const canPon = calling && myCall && !!myCall.pon && pc.mode === 'discard';
+    const canChi = calling && myCall && myCall.chiVariants && myCall.chiVariants.length > 0;
 
-    show('btn-ron', calling && myCall && !!myCall.ron, true);
-    show('btn-pon', calling && myCall && myCall.pon && pc.mode === 'discard', true);
-    show('btn-minkan', calling && myCall && myCall.minkan, false);
-    show('btn-chi', calling && myCall && myCall.chiVariants && myCall.chiVariants.length > 0, true);
+    setAction('btn-tsumo', canTsumo, 'ツモ');
+    setAction('btn-riichi', canRiichi, G.riichiMode ? 'リーチ選択をやめる' : 'リーチ');
+    $id('btn-riichi').textContent = G.riichiMode ? 'やめる' : 'リーチ';
+    $id('btn-riichi').classList.toggle('is-cancel', !!G.riichiMode);
+    setAction('btn-kan', canKan, 'カン');
+    setAction('btn-ron', canRon, 'ロン');
+    setAction('btn-pon', canPon, 'ポン');
+    setAction('btn-chi', canChi, 'チー');
+    show('btn-minkan', false, false);
     show('btn-pass', (calling && myCall) || (humanTurn && o && !!o.tsumo && G.players[0].isRiichi), false);
   }
 
