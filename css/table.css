@@ -627,6 +627,8 @@
   width: 100%;
   min-width: 0;
   align-items: flex-start;
+  align-self: stretch;
+  justify-content: center;
 }
 
 /* 自分枠も相手と同じフレーム・寸法へ統一する。 */
@@ -654,16 +656,56 @@
 #table-player-cards #card-0 .card-body {
   width: 100%;
   align-items: flex-start;
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* セリフ行をなくした2行構成を、枠の高さ中央へ配置する。 */
+#table-player-cards .card-top,
+#table-player-cards .card-bottom {
+  width: 100%;
+}
+#table-player-cards .card-name {
+  min-width: 0;
+}
+#table-player-cards .dealer-mark {
+  flex: 0 0 auto;
+  font-size: 22px;
+  line-height: 1.1;
+  padding: 1px 8px;
+  border-width: 2px;
 }
 
 /* 六つの主アクションは常設。利用不可時は非発光、利用可能時だけ点灯する。 */
 #action-bar {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
   flex-wrap: nowrap;
   min-height: 70px;
-  transform: translateX(clamp(140px, 8.5vw, 165px));
+  padding-inline: 176px;
+  transform: none;
 }
 #player-hand-wrap {
-  transform: translateX(clamp(75px, 5vw, 95px));
+  transform: none;
+}
+#action-bar #btn-pass,
+#action-bar #btn-menu {
+  position: absolute;
+  top: 50%;
+  width: 72px;
+  min-width: 72px;
+  transform: translateY(-50%);
+}
+#action-bar #btn-pass { right: 94px; }
+#action-bar #btn-menu { right: 14px; }
+#action-bar #btn-pass:hover:not(:disabled),
+#action-bar #btn-menu:hover:not(:disabled) {
+  transform: translateY(-50%);
+}
+#action-bar #btn-pass:active:not(:disabled),
+#action-bar #btn-menu:active:not(:disabled) {
+  transform: translateY(-48%) scale(.99);
 }
 #action-bar .action-slot {
   display: block !important;

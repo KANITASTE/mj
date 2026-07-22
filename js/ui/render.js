@@ -258,7 +258,12 @@ window.YM = window.YM || {};
     setAction('btn-pon', canPon, 'ポン');
     setAction('btn-chi', canChi, 'チー');
     show('btn-minkan', false, false);
-    show('btn-pass', (calling && myCall) || (humanTurn && o && !!o.tsumo && G.players[0].isRiichi), false);
+    const canPass = !!((calling && myCall) || (humanTurn && o && !!o.tsumo && G.players[0].isRiichi));
+    const pass = $id('btn-pass');
+    pass.classList.remove('hidden');
+    pass.disabled = !canPass;
+    pass.setAttribute('aria-disabled', String(!canPass));
+    pass.setAttribute('aria-label', canPass ? 'パス' : 'パス（現在は選択できません）');
   }
 
   function renderGuide(G) {

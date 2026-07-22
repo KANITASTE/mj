@@ -25,8 +25,11 @@
   #player-hand-wrap { min-height: 78px; }
   #table-player-cards .table-seat-card { width: 274px; padding-left: 90px; }
   #table-player-cards .card-face { width: 84px; height: 102px; }
-  #table-player-cards #card-0 { width: 340px; padding-left: 100px; }
-  #table-player-cards #card-0 .card-face { width: 66px; height: 66px; }
+  #table-player-cards #card-0 {
+    width: clamp(274px, 21vw, 306px);
+    padding-left: clamp(118px, 9vw, 132px);
+  }
+  #table-player-cards #card-0 .card-face { width: 76px; height: 76px; }
   #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
     width: 112px;
     height: 64px;
@@ -57,7 +60,7 @@
   .cutin-portrait { min-height: 250px; }
   #table-player-cards .table-seat-card { width: 252px; padding-left: 82px; }
   #table-player-cards .card-face { width: 76px; height: 92px; }
-  #table-player-cards #card-0 { width: 320px; padding-left: 94px; }
+  #table-player-cards #card-0 { width: 276px; padding-left: 116px; }
   #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
     width: 101px;
     height: 58px;
