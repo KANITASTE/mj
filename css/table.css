@@ -558,17 +558,17 @@
 /* 左上のロゴ用余白を保ちつつ、三家を卓の上半分へ均等に配置する。 */
 #table-player-cards #card-3 {
   left: 12.5%;
-  top: 18.5%;
+  top: 61%;
 }
 #table-player-cards #card-2 {
-  left: 50%;
-  right: auto;
-  top: 15.5%;
-  transform: translateX(-50%);
+  left: auto;
+  right: 8.5%;
+  top: 8.5%;
+  transform: none;
 }
 #table-player-cards #card-1 {
   right: 8.5%;
-  top: 18.5%;
+  top: 61%;
 }
 
 /* 相手枠：キャラを約1.2倍にし、下辺より上へ収め、情報を右側へ分離する。 */
@@ -661,6 +661,10 @@
 }
 
 @media (max-height: 800px) {
+  #table-player-cards #card-3,
+  #table-player-cards #card-1 { top: 61%; }
+  #table-player-cards #card-2 { top: 8.5%; }
+
   #table-player-cards .table-seat-card:not(#card-0) {
     width: clamp(274px, 21vw, 306px);
     padding-left: clamp(116px, 8.8vw, 132px);
@@ -683,8 +687,8 @@
 
 @media (max-height: 730px) {
   #table-player-cards #card-3,
-  #table-player-cards #card-1 { top: 17.5%; }
-  #table-player-cards #card-2 { top: 15.4%; }
+  #table-player-cards #card-1 { top: 59%; }
+  #table-player-cards #card-2 { top: 8%; }
   #table-player-cards .table-seat-card:not(#card-0) {
     width: 276px;
     padding-left: 116px;
