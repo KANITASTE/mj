@@ -8,12 +8,19 @@ window.YM = window.YM || {};
   let ctx = null;
   let master = null;
   let enabled = false;
+  let bgmPlayer = null;
+  let bgmSource = '';
+  let bgmRequested = false;
+  const BGM_VOLUME_SCALE = 0.5;
 
   AU.settings = { bgm: true, se: true, volume: 60 };
 
   // 初回のユーザー操作後に呼ぶ(自動再生制限対策)
   AU.unlock = function () {
-    if (ctx) return;
+    if (ctx) {
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      return;
+    }
     try {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       master = ctx.createGain();
@@ -26,7 +33,76 @@ window.YM = window.YM || {};
   };
 
   AU.applyVolume = function () {
-    if (master) master.gain.value = (AU.settings.volume / 100) * 0.5;
+    const normalized = Math.max(0, Math.min(100, Number(AU.settings.volume) || 0)) / 100;
+    if (master) master.gain.value = normalized * 0.5;
+    if (bgmPlayer) {
+      bgmPlayer.volume = normalized * BGM_VOLUME_SCALE;
+      bgmPlayer.dataset.volume = String(bgmPlayer.volume);
+    }
+  };
+
+  function ensureBgmPlayer() {
+    if (bgmPlayer) return bgmPlayer;
+    bgmPlayer = document.createElement('audio');
+    bgmPlayer.id = 'ym-main-bgm';
+    bgmPlayer.hidden = true;
+    bgmPlayer.loop = true;
+    bgmPlayer.preload = 'auto';
+    bgmPlayer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(bgmPlayer);
+    AU.applyVolume();
+    return bgmPlayer;
+  }
+
+  AU.playBgm = function (src) {
+    if (!src) return Promise.resolve(false);
+    const player = ensureBgmPlayer();
+    const absoluteSrc = new URL(src, document.baseURI).href;
+    bgmRequested = true;
+
+    if (bgmSource !== absoluteSrc) {
+      player.pause();
+      player.src = src;
+      player.currentTime = 0;
+      player.load();
+      bgmSource = absoluteSrc;
+    }
+
+    AU.applyVolume();
+    if (!AU.settings.bgm) {
+      player.pause();
+      return Promise.resolve(false);
+    }
+    return player.play().then(() => true).catch(() => false);
+  };
+
+  AU.stopBgm = function (forgetSource) {
+    bgmRequested = false;
+    if (!bgmPlayer) return;
+    bgmPlayer.pause();
+    bgmPlayer.currentTime = 0;
+    if (forgetSource !== false) {
+      bgmPlayer.removeAttribute('src');
+      bgmPlayer.load();
+      bgmSource = '';
+    }
+  };
+
+  AU.syncBgm = function () {
+    AU.applyVolume();
+    if (!bgmPlayer || !bgmRequested || !bgmSource) return;
+    if (AU.settings.bgm) bgmPlayer.play().catch(() => {});
+    else bgmPlayer.pause();
+  };
+
+  AU.getBgmState = function () {
+    return {
+      source: bgmSource,
+      requested: bgmRequested,
+      paused: bgmPlayer ? bgmPlayer.paused : true,
+      loop: bgmPlayer ? bgmPlayer.loop : false,
+      volume: bgmPlayer ? bgmPlayer.volume : 0
+    };
   };
 
   function tone(freq, dur, type, vol, delay, slideTo) {

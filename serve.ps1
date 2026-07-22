@@ -12,7 +12,8 @@ $mime = @{
   ".html"="text/html; charset=utf-8"; ".css"="text/css; charset=utf-8";
   ".js"="text/javascript; charset=utf-8"; ".svg"="image/svg+xml";
   ".webp"="image/webp"; ".png"="image/png"; ".jpg"="image/jpeg";
-  ".json"="application/json"; ".ico"="image/x-icon"; ".woff2"="font/woff2"
+  ".json"="application/json"; ".ico"="image/x-icon"; ".woff2"="font/woff2";
+  ".mp3"="audio/mpeg"
 }
 
 while ($listener.IsListening) {

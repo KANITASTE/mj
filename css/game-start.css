@@ -145,17 +145,19 @@
 }
 
 .prep-opponent {
-  top: 32.15%;
-  height: 42.2%;
-  width: 7.45%;
+  left: var(--opponent-left);
+  top: 32.20%;
+  width: var(--opponent-width);
+  height: 41.98%;
+  box-sizing: border-box;
   border-radius: 10px;
 }
-.opponent-ayano { left: 29.4%; }
-.opponent-lili { left: 37.05%; }
-.opponent-masked { left: 44.65%; }
-.opponent-tanabe { left: 52.3%; }
-.opponent-tome { left: 59.95%; }
-.opponent-chiipon { left: 67.25%; width: 7.1%; }
+.opponent-ayano { --opponent-left: 29.366%; --opponent-width: 7.237%; }
+.opponent-lili { --opponent-left: 36.902%; --opponent-width: 7.177%; }
+.opponent-masked { --opponent-left: 44.318%; --opponent-width: 7.117%; }
+.opponent-tanabe { --opponent-left: 51.734%; --opponent-width: 7.357%; }
+.opponent-tome { --opponent-left: 59.390%; --opponent-width: 7.416%; }
+.opponent-chiipon { --opponent-left: 67.105%; --opponent-width: 7.476%; }
 
 .prep-opponent:hover,
 .prep-opponent:focus-visible {

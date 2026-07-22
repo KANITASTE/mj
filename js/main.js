@@ -11,6 +11,7 @@ const DEBUG_MODE = true;
   const St = () => YM.Storage;
 
   const Main = {};
+  const PREP_BGM = 'assets/audio/mainbgm.mp3';
   let characterSelection = null;
   let selectedAvatar = '';
   const prepTouchedSettings = new Set();
@@ -22,6 +23,7 @@ const DEBUG_MODE = true;
     $id('final-overlay').classList.add('hidden');
     $id('game-menu').classList.add('hidden');
     refreshContinue();
+    AU().stopBgm(true);
     UI().showScreen('title');
   };
 
@@ -38,6 +40,7 @@ const DEBUG_MODE = true;
     refreshPrepSettingsUI();
     updatePrepReady();
     UI().showScreen('character-select');
+    AU().playBgm(PREP_BGM);
   }
 
   function confirmCharacters() {
@@ -211,6 +214,7 @@ const DEBUG_MODE = true;
     AU().settings.se = s.se;
     AU().settings.volume = s.volume;
     AU().applyVolume();
+    AU().syncBgm();
   }
 
   let settingsReturn = 'title';
@@ -255,7 +259,7 @@ const DEBUG_MODE = true;
     $id('btn-continue').addEventListener('click', startGame);
     $id('btn-random-characters').addEventListener('click', () => { AU().se('select'); characterSelection.randomize(); });
     $id('btn-confirm-characters').addEventListener('click', confirmCharacters);
-    $id('btn-character-back').addEventListener('click', () => { AU().se('select'); UI().showScreen('title'); });
+    $id('btn-character-back').addEventListener('click', () => { AU().se('select'); Main.goTitle(); });
     $id('btn-howto').addEventListener('click', () => { AU().unlock(); AU().se('select'); settingsReturn = 'title'; UI().showScreen('howto'); });
     $id('btn-prep-howto').addEventListener('click', () => { AU().se('select'); settingsReturn = 'character-select'; UI().showScreen('howto'); });
     $id('btn-settings').addEventListener('click', () => {
