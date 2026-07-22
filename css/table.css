@@ -558,7 +558,7 @@
 /* 左上のロゴ用余白を保ちつつ、三家を卓の上半分へ均等に配置する。 */
 #table-player-cards #card-3 {
   left: 12.5%;
-  top: 61%;
+  top: 18.5%;
 }
 #table-player-cards #card-2 {
   left: auto;
@@ -596,8 +596,9 @@
 
 /* 自分枠：アバターを内側へ収め、手牌に干渉しない範囲で枠を拡大する。 */
 #table-player-cards #card-0 {
-  left: 1.8%;
-  bottom: 1.8%;
+  left: 12.5%;
+  top: 61%;
+  bottom: auto;
   width: clamp(390px, 31vw, 460px);
   padding: 17px 30px 15px 128px;
 }
@@ -661,9 +662,10 @@
 }
 
 @media (max-height: 800px) {
-  #table-player-cards #card-3,
+  #table-player-cards #card-3 { top: 18.5%; }
   #table-player-cards #card-1 { top: 61%; }
   #table-player-cards #card-2 { top: 8.5%; }
+  #table-player-cards #card-0 { top: 61%; }
 
   #table-player-cards .table-seat-card:not(#card-0) {
     width: clamp(274px, 21vw, 306px);
@@ -686,9 +688,10 @@
 }
 
 @media (max-height: 730px) {
-  #table-player-cards #card-3,
+  #table-player-cards #card-3 { top: 17.5%; }
   #table-player-cards #card-1 { top: 59%; }
   #table-player-cards #card-2 { top: 8%; }
+  #table-player-cards #card-0 { top: 59%; }
   #table-player-cards .table-seat-card:not(#card-0) {
     width: 276px;
     padding-left: 116px;
