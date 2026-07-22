@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="css/common.css">
 <link rel="stylesheet" href="css/title.css">
 <link rel="stylesheet" href="css/game-start.css?v=20260722-3">
-<link rel="stylesheet" href="css/table.css?v=20260722-centered-controls">
+<link rel="stylesheet" href="css/table.css?v=20260722-stable-hand-melds">
 <link rel="stylesheet" href="css/tiles.css?v=20260722-stage1">
 <link rel="stylesheet" href="css/character.css?v=20260721-2">
 <link rel="stylesheet" href="css/modal.css">
@@ -169,7 +169,6 @@
       <!-- 上段: 上家CPU(綾乃) -->
       <div id="area-top">
         <div class="hand-row" id="hand-2"></div>
-        <div class="meld-row" id="melds-2"></div>
       </div>
 
       <!-- 中段 -->
@@ -177,7 +176,6 @@
         <!-- 左家CPU -->
         <div id="area-left">
           <div class="hand-col" id="hand-3"></div>
-          <div class="meld-row v" id="melds-3"></div>
         </div>
 
         <!-- 卓中央 -->
@@ -213,7 +211,6 @@
         <!-- 右家CPU -->
         <div id="area-right">
           <div class="hand-col" id="hand-1"></div>
-          <div class="meld-row v" id="melds-1"></div>
         </div>
       </div>
 
@@ -223,7 +220,6 @@
           <div id="player-hand-wrap">
             <div id="player-hand"></div>
             <div id="player-tsumo"></div>
-            <div class="meld-row" id="melds-0"></div>
           </div>
           <div id="action-bar">
             <button id="btn-chi" class="action-btn action-slot" aria-label="チー（現在は選択できません）" aria-disabled="true" disabled>チー</button>
@@ -233,7 +229,7 @@
             <button id="btn-riichi" class="action-btn action-slot" aria-label="リーチ（現在は選択できません）" aria-disabled="true" disabled>リーチ</button>
             <button id="btn-tsumo" class="action-btn action-slot" aria-label="ツモ（現在は選択できません）" aria-disabled="true" disabled>ツモ</button>
             <button id="btn-ron" class="action-btn action-slot" aria-label="ロン（現在は選択できません）" aria-disabled="true" disabled>ロン</button>
-            <button id="btn-pass" class="action-btn hidden">パス</button>
+            <button id="btn-pass" class="action-btn" aria-label="パス（現在は選択できません）" aria-disabled="true" disabled>パス</button>
             <button id="btn-menu" class="action-btn sub">メニュー</button>
           </div>
           <div id="info-guide"></div>
@@ -248,6 +244,7 @@
             <div class="card-top"><span class="card-wind" id="card-wind-3">北</span><span class="card-name" id="card-name-3">左家</span><span class="dealer-mark hidden" id="card-dealer-3">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-3">25000</span><span class="card-rank" id="card-rank-3">1位</span><span class="riichi-chip hidden" id="card-riichi-3">立直</span></div>
           </div>
+          <div class="meld-row table-card-melds" id="melds-3"></div>
         </div>
         <div class="info-card table-seat-card" id="card-2">
           <div class="card-face" id="card-face-2"></div>
@@ -255,6 +252,7 @@
             <div class="card-top"><span class="card-wind" id="card-wind-2">西</span><span class="card-name" id="card-name-2">対面</span><span class="dealer-mark hidden" id="card-dealer-2">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-2">25000</span><span class="card-rank" id="card-rank-2">1位</span><span class="riichi-chip hidden" id="card-riichi-2">立直</span></div>
           </div>
+          <div class="meld-row table-card-melds" id="melds-2"></div>
         </div>
         <div class="info-card table-seat-card" id="card-0">
           <div class="card-face" id="card-face-0"></div>
@@ -262,6 +260,7 @@
             <div class="card-top"><span class="card-wind" id="card-wind-0">東</span><span class="card-name" id="card-name-0">あなた</span><span class="dealer-mark hidden" id="card-dealer-0">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-0">25000</span><span class="card-rank" id="card-rank-0">1位</span><span class="riichi-chip hidden" id="card-riichi-0">立直</span></div>
           </div>
+          <div class="meld-row table-card-melds" id="melds-0"></div>
         </div>
         <div class="info-card table-seat-card" id="card-1">
           <div class="card-face" id="card-face-1"></div>
@@ -269,6 +268,7 @@
             <div class="card-top"><span class="card-wind" id="card-wind-1">南</span><span class="card-name" id="card-name-1">右家</span><span class="dealer-mark hidden" id="card-dealer-1">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-1">25000</span><span class="card-rank" id="card-rank-1">1位</span><span class="riichi-chip hidden" id="card-riichi-1">立直</span></div>
           </div>
+          <div class="meld-row table-card-melds" id="melds-1"></div>
         </div>
       </div>
 

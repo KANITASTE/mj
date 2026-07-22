@@ -112,7 +112,7 @@
   display: flex;
   flex-wrap: wrap-reverse;
   direction: rtl;               /* 本人視点で左→右(画面は右→左) */
-  justify-content: center;
+  justify-content: flex-start;  /* 2段目以降も画面右側から詰める */
   align-content: center;
   width: calc(var(--river-tile-width) * 6 + 12px);
   min-height: calc(var(--river-tile-height) + 4px);
@@ -195,7 +195,7 @@
 /* ===== 下段(プレイヤー) ===== */
 #area-bottom {
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 12px;
   padding: 6px 14px 10px;
   background: linear-gradient(0deg, rgba(10, 7, 5, 0.85), rgba(10, 7, 5, 0.3));
@@ -205,10 +205,12 @@
 }
 #player-center {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  display: grid;
+  grid-template-rows: minmax(78px, 1fr) 70px 16px;
+  align-items: end;
+  justify-items: center;
+  gap: 0;
+  height: 100%;
   min-width: 0;
 }
 #player-hand-wrap {
@@ -216,7 +218,9 @@
   align-items: flex-end;
   justify-content: center;
   gap: 5px;
-  min-height: 70px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 #player-hand { display: flex; gap: 0; }
 /* 牌PNGの透明余白ぶんを負マージンで詰める */
@@ -309,6 +313,8 @@
   font-size: 12px;
   color: #b7ac97;
   min-height: 16px;
+  height: 16px;
+  overflow: hidden;
   letter-spacing: 0.08em;
 }
 
@@ -660,6 +666,29 @@
   justify-content: center;
 }
 
+/* 副露牌は、それぞれのメンバー枠の右横へ縦に追加する。 */
+#table-player-cards .table-card-melds {
+  position: absolute;
+  left: calc(100% - 8px);
+  top: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  transform: translateY(-50%);
+}
+#table-player-cards .table-card-melds:empty {
+  display: none;
+}
+#table-player-cards .table-card-melds .meld-group {
+  flex-wrap: nowrap;
+}
+#table-player-cards .table-card-melds .tile.mini {
+  width: calc(var(--river-tile-width) * .78);
+  height: calc(var(--river-tile-height) * .78);
+}
+
 /* セリフ行をなくした2行構成を、枠の高さ中央へ配置する。 */
 #table-player-cards .card-top,
 #table-player-cards .card-bottom {
@@ -689,7 +718,19 @@
 #player-hand-wrap {
   transform: none;
 }
-#action-bar #btn-pass,
+#action-bar::before {
+  content: '';
+  order: 0;
+  flex: 0 0 72px;
+  width: 72px;
+  height: 38px;
+}
+#action-bar #btn-pass {
+  position: static;
+  width: 72px;
+  min-width: 72px;
+  transform: none;
+}
 #action-bar #btn-menu {
   position: absolute;
   top: 50%;
@@ -697,13 +738,10 @@
   min-width: 72px;
   transform: translateY(-50%);
 }
-#action-bar #btn-pass { right: 94px; }
 #action-bar #btn-menu { right: 14px; }
-#action-bar #btn-pass:hover:not(:disabled),
 #action-bar #btn-menu:hover:not(:disabled) {
   transform: translateY(-50%);
 }
-#action-bar #btn-pass:active:not(:disabled),
 #action-bar #btn-menu:active:not(:disabled) {
   transform: translateY(-48%) scale(.99);
 }
