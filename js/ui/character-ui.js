@@ -8,8 +8,11 @@ window.YM = window.YM || {};
 
   /* ポートレートを要素へ描画(画像 > SVG > イニシャル) */
   CU.setPortraitInto = function (el, charId, expr) {
-    const ch = YM.CHARACTERS[charId];
+    const canonicalId = YM.resolveCharacterId(charId);
+    const ch = YM.characterForId(canonicalId);
     el.innerHTML = '';
+    if (canonicalId) el.dataset.characterId = canonicalId;
+    else delete el.dataset.characterId;
     if (!ch) return;
     if (ch.placeholder || !ch.images || !ch.images.normal) {
       el.innerHTML = monogram(ch);
@@ -37,8 +40,14 @@ window.YM = window.YM || {};
 
   CU.buildCharacterSelect = function (initialIds) {
     const grid = $id('character-grid');
-    let selected = (initialIds || []).filter(id => YM.CHARACTERS[id]).slice(0, 3);
+    let selected = YM.normalizeCharacterSelection(initialIds);
     const cards = Array.from(grid.querySelectorAll('.prep-opponent'));
+
+    cards.forEach(card => {
+      const id = YM.resolveCharacterId(card.dataset.characterId);
+      if (!id) throw new Error(`Invalid preparation card character ID: ${card.dataset.characterId}`);
+      card.dataset.characterId = id;
+    });
 
     function renderSelection() {
       cards.forEach(card => {
@@ -52,7 +61,7 @@ window.YM = window.YM || {};
 
     cards.forEach(card => {
       card.onclick = () => {
-        const id = card.dataset.characterId;
+        const id = YM.resolveCharacterId(card.dataset.characterId);
         const pos = selected.indexOf(id);
         if (pos >= 0) selected.splice(pos, 1);
         else if (selected.length < 3) selected.push(id);
@@ -63,7 +72,7 @@ window.YM = window.YM || {};
     return {
       getSelected: () => selected.slice(),
       randomize() {
-        const ids = YM.characterList().map(ch => ch.id);
+        const ids = YM.CHARACTER_ORDER.slice();
         for (let i = ids.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [ids[i], ids[j]] = [ids[j], ids[i]];
@@ -76,7 +85,7 @@ window.YM = window.YM || {};
 
   /* 顔アイコン(情報カード用) */
   CU.faceIconHTML = function (charId) {
-    const ch = YM.CHARACTERS[charId];
+    const ch = YM.characterForId(charId);
     if (!ch) {
       const avatar = YM.Storage && YM.Storage.data.playerProfile
         ? YM.Storage.data.playerProfile.avatar : '';
@@ -97,13 +106,15 @@ window.YM = window.YM || {};
     opts = opts || {};
     const layer = $id('cutin-layer');
     if (!layer) return;
+    charId = YM.resolveCharacterId(charId);
     const d = YM.Dialogue.pick(charId, situation);
-    const ch = YM.CHARACTERS[charId];
+    const ch = YM.characterForId(charId);
     if (!d && !opts.banner) return;
 
     const effect = opts.effect || CU.effectFor(charId, situation);
     const el = document.createElement('div');
     el.className = `cutin cutin-${situation}${effect ? ` effect-${effect}` : ''}`;
+    if (charId) el.dataset.characterId = charId;
     const shade = document.createElement('div');
     shade.className = 'cutin-shade';
     el.appendChild(shade);
@@ -186,6 +197,8 @@ window.YM = window.YM || {};
       const d = YM.Dialogue.pick(player.characterId, 'opening');
       const card = document.createElement('article');
       card.className = 'start-greeting-card';
+      card.dataset.characterId = player.characterId;
+      card.dataset.cpuProfile = player.cpuProfile;
       card.style.setProperty('--delay', `${order * 120}ms`);
       const portrait = document.createElement('div');
       portrait.className = 'start-greeting-portrait';

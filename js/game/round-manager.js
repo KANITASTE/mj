@@ -15,9 +15,31 @@ window.YM = window.YM || {};
   Round.startGame = function (selectedCharacterIds) {
     YM.timers.clearAll();
     YM.Animation.clear();
-    const ids = selectedCharacterIds || (Game.G && Game.G.selectedCharacterIds) || YM.defaultCharacterSelection;
+    const requestedIds = selectedCharacterIds != null
+      ? selectedCharacterIds
+      : (Game.G && Game.G.selectedCharacterIds) ||
+        (YM.Storage && YM.Storage.data.selectedCharacters) ||
+        YM.defaultCharacterSelection;
+    let ids = YM.normalizeCharacterSelection(requestedIds);
+    if (ids.length !== 3) {
+      console.warn('Invalid character selection; using the complete default trio.', requestedIds);
+      ids = YM.defaultCharacterSelection.slice();
+    }
+    if (YM.Storage) {
+      YM.Storage.data.selectedCharacters = ids.slice();
+      YM.Storage.save();
+    }
     Game.G = GS().create(ids);
     const G = Game.G;
+    const gameScreen = document.getElementById('screen-game');
+    if (gameScreen) {
+      gameScreen.dataset.selectedCharacterIds = G.selectedCharacterIds.join(',');
+      G.players.slice(1).forEach((player, index) => {
+        const seat = index + 1;
+        gameScreen.dataset[`seat${seat}CharacterId`] = player.characterId;
+        gameScreen.dataset[`seat${seat}CpuProfile`] = player.cpuProfile;
+      });
+    }
     G.handNumber = 1;
     G.dealerIndex = 0;
     UI().showScreen('game');      // 卓を表示(山牌生成・配牌は親決め後)

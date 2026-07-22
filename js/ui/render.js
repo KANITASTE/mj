@@ -182,6 +182,8 @@ window.YM = window.YM || {};
     const p = G.players[i];
     const card = $id(`card-${i}`);
     if (!card) return;
+    card.dataset.characterId = p.isHuman ? 'player' : p.characterId;
+    card.dataset.cpuProfile = p.cpuProfile || '';
     const ranks = GS().ranks(G);
     card.classList.toggle('active', G.currentPlayerIndex === i && G.phase !== C.PHASE.ENDED);
     card.classList.toggle('riichi', p.isRiichi || p.riichiPending);

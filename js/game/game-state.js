@@ -51,10 +51,13 @@ YM.timers = {
 
   /* ゲーム全体の状態 */
   GS.create = function (selectedCharacterIds) {
-    const selected = Array.isArray(selectedCharacterIds) && selectedCharacterIds.length === 3
-      ? selectedCharacterIds : YM.defaultCharacterSelection;
+    const selected = YM.normalizeCharacterSelection(selectedCharacterIds);
+    if (selected.length !== 3) {
+      throw new Error('GameState requires exactly three valid character IDs.');
+    }
     const cpuPlayers = selected.map((characterId, offset) => {
-      const ch = YM.CHARACTERS[characterId] || YM.characterList()[offset];
+      const ch = YM.characterForId(characterId);
+      if (!ch) throw new Error(`Unknown character ID: ${characterId}`);
       return newPlayer(offset + 1, ch.name, false, ch.id, ch.playStyle || 'balance');
     });
     const profile = YM.Storage && YM.Storage.data.playerProfile;

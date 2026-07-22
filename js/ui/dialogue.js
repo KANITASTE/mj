@@ -7,6 +7,7 @@ window.YM = window.YM || {};
 
   /* charId のセリフ集から situation のセリフを1つ選ぶ */
   D.pick = function (charId, situation) {
+    charId = YM.resolveCharacterId(charId);
     const generic = {
       opening: [{ expr: 'normal', text: 'よろしくお願いします。' }],
       idle: [{ expr: 'normal', text: 'いい勝負になりそうですね。' }],

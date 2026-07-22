@@ -4,12 +4,12 @@ window.YM = window.YM || {};
 
 (function () {
   const KEY = 'yoimachi_mahjong_4p_save_v1';
-  const VALID_CHARACTERS = ['ayano', 'lili', 'masked', 'tanabe', 'tome', 'mofuzo'];
   const VALID_AVATARS = ['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6'];
   const St = {};
 
   function defaults() {
     return {
+      saveVersion: 2,
       wins: 0,           // 1位回数
       gamesPlayed: 0,
       intimacy: 0,
@@ -29,10 +29,17 @@ window.YM = window.YM || {};
       const parsed = JSON.parse(raw);
       St.data = Object.assign(defaults(), parsed);
       if (!Array.isArray(St.data.unlockedEvents)) St.data.unlockedEvents = [];
-      if (!Array.isArray(St.data.selectedCharacters)) St.data.selectedCharacters = [];
-      St.data.selectedCharacters = St.data.selectedCharacters
-        .filter((id, index, all) => VALID_CHARACTERS.includes(id) && all.indexOf(id) === index)
-        .slice(0, 3);
+      const legacySelection = Array.isArray(parsed.selectedCharacters)
+        ? parsed.selectedCharacters
+        : Array.isArray(parsed.selectedCharacterIds)
+          ? parsed.selectedCharacterIds
+          : Array.isArray(parsed.selectedCharacterIndices)
+            ? parsed.selectedCharacterIndices
+            : Array.isArray(parsed.selectedCharacterIndexes)
+              ? parsed.selectedCharacterIndexes
+            : [];
+      St.data.selectedCharacters = YM.normalizeCharacterSelection(legacySelection);
+      St.data.saveVersion = 2;
       if (typeof St.data.intimacy !== 'number') St.data.intimacy = 0;
       St.data.settings = Object.assign(defaults().settings, St.data.settings || {});
       St.data.settings.bgm = St.data.settings.bgm !== false;
@@ -43,6 +50,7 @@ window.YM = window.YM || {};
       St.data.playerProfile.name = typeof St.data.playerProfile.name === 'string'
         ? St.data.playerProfile.name.trim().slice(0, 12) : '';
       if (!VALID_AVATARS.includes(St.data.playerProfile.avatar)) St.data.playerProfile.avatar = '';
+      St.save();
     } catch (e) {
       St.data = defaults();
     }

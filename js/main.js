@@ -35,8 +35,9 @@ const DEBUG_MODE = true;
     AU().unlock();
     AU().se('decide');
     resetPrepInteractionState();
-    characterSelection = YM.CharacterUI.buildCharacterSelect([]);
-    refreshProfileUI(true);
+    const savedSelection = YM.normalizeCharacterSelection(St().data.selectedCharacters);
+    characterSelection = YM.CharacterUI.buildCharacterSelect(savedSelection);
+    refreshProfileUI(false);
     refreshPrepSettingsUI();
     updatePrepReady();
     UI().showScreen('character-select');
@@ -44,7 +45,9 @@ const DEBUG_MODE = true;
   }
 
   function confirmCharacters() {
-    const selected = characterSelection ? characterSelection.getSelected() : [];
+    const selected = YM.normalizeCharacterSelection(
+      characterSelection ? characterSelection.getSelected() : []
+    );
     const name = $id('player-name').value.trim();
     if (!name) {
       $id('profile-error').textContent = 'プレイヤー名を入力してください。';
@@ -163,7 +166,7 @@ const DEBUG_MODE = true;
       });
     });
     document.addEventListener('ym:opponents-changed', e => {
-      St().data.selectedCharacters = e.detail.slice();
+      St().data.selectedCharacters = YM.normalizeCharacterSelection(e.detail);
       St().save();
       updatePrepReady();
     });

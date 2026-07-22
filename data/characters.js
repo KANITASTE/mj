@@ -90,6 +90,49 @@ YM.CHARACTERS = {
 };
 
 YM.CHARACTER_ORDER = ['ayano', 'lili', 'masked', 'tanabe', 'tome', 'mofuzo'];
+YM.CHARACTER_ID_ALIASES = Object.freeze({
+  ayanokagurazaka: 'ayano',
+  kagurazakaayano: 'ayano',
+  '神楽坂綾乃': 'ayano',
+  liliarisugawa: 'lili',
+  arisugawalili: 'lili',
+  '有栖川リリ': 'lili',
+  '謎の覆面': 'masked',
+  tanabehajime: 'tanabe',
+  '田辺一': 'tanabe',
+  umezawatome: 'tome',
+  '梅沢トメ': 'tome',
+  chiipon: 'mofuzo',
+  'ちいぽん': 'mofuzo',
+  cpu_a: 'lili',
+  cpu_b: 'tome'
+});
+
+YM.resolveCharacterId = function (value) {
+  if (Number.isInteger(value)) return YM.CHARACTER_ORDER[value] || null;
+  if (typeof value !== 'string') return null;
+  const raw = value.trim();
+  if (!raw) return null;
+  if (/^\d+$/.test(raw)) return YM.CHARACTER_ORDER[Number(raw)] || null;
+  const id = YM.CHARACTER_ID_ALIASES[raw] || raw;
+  return YM.CHARACTER_ORDER.includes(id) ? id : null;
+};
+
+YM.normalizeCharacterSelection = function (values) {
+  if (!Array.isArray(values)) return [];
+  const normalized = [];
+  values.forEach(value => {
+    const id = YM.resolveCharacterId(value);
+    if (id && !normalized.includes(id)) normalized.push(id);
+  });
+  return normalized.slice(0, 3);
+};
+
+YM.characterForId = function (value) {
+  const id = YM.resolveCharacterId(value);
+  return id ? YM.CHARACTERS[id] : null;
+};
+
 YM.characterList = function () {
   return YM.CHARACTER_ORDER.map(id => YM.CHARACTERS[id]).filter(Boolean);
 };
