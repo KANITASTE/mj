@@ -227,38 +227,81 @@
 #action-bar {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .action-btn {
-  font-family: var(--serif-jp);
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.2em;
-  text-indent: 0.2em;
-  color: #f0dfc0;
-  background: linear-gradient(180deg, #55212c 0%, #38141c 60%, #421823 100%);
-  border: 1px solid rgba(214, 178, 106, 0.55);
+  min-width: 72px;
+  height: 38px;
+  padding: 0 16px;
+  font: 500 12px/1 var(--ui-font);
+  color: #c4b998;
+  background: linear-gradient(180deg, rgba(42, 32, 22, 0.85), rgba(20, 14, 9, 0.9));
+  border: 1px solid rgba(176, 141, 74, 0.4);
   border-radius: 2px;
-  padding: 7px 22px;
-  box-shadow: inset 0 1px 0 rgba(240, 223, 192, 0.15), 0 4px 12px rgba(0, 0, 0, 0.55);
-  transition: filter 0.15s, transform 0.08s;
+  transition: filter 0.15s ease, transform 0.08s ease, opacity 0.15s ease;
   cursor: pointer;
 }
-.action-btn:hover { filter: brightness(1.18); }
-.action-btn:active { transform: translateY(1px); }
-.action-btn.sub {
-  font-family: var(--ui-font);
-  font-weight: 500;
-  font-size: 12px;
-  background: linear-gradient(180deg, rgba(42, 32, 22, 0.85), rgba(20, 14, 9, 0.9));
-  border-color: rgba(176, 141, 74, 0.4);
-  color: #c4b998;
+.action-btn:hover { filter: brightness(1.08); }
+.action-btn:active { transform: translateY(1px) scale(0.99); }
+
+/* 支給PNGを使う主要アクション。文字はアクセシビリティ用にDOMへ残す。 */
+#btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
+  width: 124px;
+  height: 70px;
+  min-width: 0;
+  padding: 0;
+  font-size: 0;
+  color: transparent;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 5px 8px rgba(0,0,0,.55));
+}
+#btn-pon { order: 1; background-image: url('../assets/ui/actions/pon.png'); }
+#btn-chi { order: 2; background-image: url('../assets/ui/actions/chi.png'); }
+#btn-minkan, #btn-kan { order: 3; background-image: url('../assets/ui/actions/kan.png'); }
+#btn-riichi { order: 4; background-image: url('../assets/ui/actions/riichi.png'); }
+#btn-tsumo { order: 5; background-image: url('../assets/ui/actions/tsumo.png'); }
+#btn-ron { order: 6; background-image: url('../assets/ui/actions/ron.png'); }
+#btn-pass { order: 7; }
+#btn-menu { order: 8; }
+#btn-pon:hover, #btn-chi:hover, #btn-minkan:hover, #btn-kan:hover,
+#btn-riichi:hover, #btn-tsumo:hover, #btn-ron:hover {
+  filter: brightness(1.08) drop-shadow(0 7px 11px rgba(117,255,91,.38));
+  transform: translateY(-1px) scale(1.02);
+}
+#btn-pon:active, #btn-chi:active, #btn-minkan:active, #btn-kan:active,
+#btn-riichi:active, #btn-tsumo:active, #btn-ron:active {
+  transform: translateY(1px) scale(.99);
+  filter: brightness(.92) drop-shadow(0 3px 6px rgba(0,0,0,.48));
+}
+#action-bar .action-btn:disabled {
+  opacity: .35;
+  pointer-events: none;
+}
+#btn-riichi.is-cancel::after {
+  content: '取消';
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 18px;
+  margin: 42px auto 0;
+  border: 1px solid rgba(255,232,166,.75);
+  border-radius: 9px;
+  color: #fff0bd;
+  background: rgba(48,8,12,.92);
+  font: 700 10px/1 var(--ui-font);
+  box-shadow: 0 2px 5px rgba(0,0,0,.55);
 }
 .action-btn.glow { animation: btn-glow 2s ease-in-out infinite; }
 @keyframes btn-glow {
-  0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,0.55), 0 0 8px rgba(214, 178, 106, 0.25); }
-  50% { box-shadow: 0 4px 12px rgba(0,0,0,0.55), 0 0 20px rgba(214, 178, 106, 0.55); }
+  0%, 100% { filter: brightness(1) drop-shadow(0 5px 8px rgba(45,255,77,.18)); }
+  50% { filter: brightness(1.08) drop-shadow(0 7px 15px rgba(100,255,100,.55)); }
 }
 
 #info-guide {
@@ -388,6 +431,87 @@
   animation: line-in 0.3s ease-out;
 }
 @keyframes line-in { from { opacity: 0; transform: translateY(3px); } }
+
+/* ===== 第1段階: 支給プレイヤーフレーム ===== */
+#table-player-cards .table-seat-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: clamp(258px, 21vw, 308px);
+  min-width: 0;
+  max-width: none;
+  min-height: 0;
+  aspect-ratio: 1328 / 378;
+  padding: 12px 22px 11px 98px;
+  gap: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent url('../assets/ui/player/opponent_frame.png') center / 100% 100% no-repeat;
+  box-shadow: none;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,.62));
+  transition: filter .2s ease, transform .2s ease;
+}
+#table-player-cards .table-seat-card.active {
+  filter: brightness(1.08) drop-shadow(0 0 11px rgba(255,141,39,.72)) drop-shadow(0 9px 12px rgba(0,0,0,.62));
+}
+#table-player-cards .table-seat-card.riichi {
+  filter: drop-shadow(0 0 12px rgba(255,75,75,.72)) drop-shadow(0 9px 12px rgba(0,0,0,.62));
+}
+#table-player-cards #card-3 { left: 11.5%; top: 17%; }
+#table-player-cards #card-2 { left: 50%; right: auto; top: 9.2%; transform: translateX(-50%); }
+#table-player-cards #card-1 { right: 9%; top: 17%; }
+#table-player-cards #card-0 {
+  left: 1.2%;
+  top: auto;
+  bottom: .7%;
+  width: clamp(320px, 28vw, 400px);
+  aspect-ratio: 1328 / 379;
+  padding: 16px 28px 14px 108px;
+  background-image: url('../assets/ui/player/self_frame.png');
+  z-index: 2;
+}
+#table-player-cards .card-face {
+  position: absolute;
+  left: 14px;
+  bottom: 7px;
+  width: 92px;
+  height: 112px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+#table-player-cards .table-character-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 5px 5px rgba(0,0,0,.64));
+}
+#table-player-cards #card-0 .card-face {
+  left: 23px;
+  bottom: 15px;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid rgba(255,183,88,.78);
+  border-radius: 7px;
+  background: #140c08;
+  box-shadow: 0 0 12px rgba(255,102,24,.32);
+}
+#table-player-cards .card-body {
+  position: relative;
+  z-index: 1;
+  gap: 3px;
+  text-shadow: 0 2px 3px rgba(0,0,0,.94);
+}
+#table-player-cards .card-top { gap: 7px; }
+#table-player-cards .card-wind { color: #ffcd7b; }
+#table-player-cards .card-name { font-size: 14px; color: #fff0d5; }
+#table-player-cards .card-score { font-size: 17px; color: #ffca74; }
+#table-player-cards .card-rank { color: #d9c3a3; }
+#table-player-cards .card-line { color: #c8a985; }
 
 /* ===== チー候補選択 ===== */
 #chi-select {

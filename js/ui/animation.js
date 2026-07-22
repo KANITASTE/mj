@@ -38,10 +38,12 @@ window.YM = window.YM || {};
 
     const speedLines = document.createElement('div');
     speedLines.className = 'fx-announcement-lines';
+    const frame = document.createElement('div');
+    frame.className = 'fx-announcement-frame';
     const main = document.createElement('div');
     main.className = 'fx-announcement-word';
     main.textContent = word;
-    el.append(speedLines, main);
+    el.append(speedLines, frame, main);
 
     if (opts.actor) {
       const actor = document.createElement('div');

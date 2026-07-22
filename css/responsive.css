@@ -23,6 +23,14 @@
   .card-face { width: 32px; height: 32px; }
   .fx-banner { font-size: 60px; }
   #player-hand-wrap { min-height: 78px; }
+  #table-player-cards .table-seat-card { width: 274px; padding-left: 90px; }
+  #table-player-cards .card-face { width: 84px; height: 102px; }
+  #table-player-cards #card-0 { width: 340px; padding-left: 100px; }
+  #table-player-cards #card-0 .card-face { width: 66px; height: 66px; }
+  #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
+    width: 112px;
+    height: 64px;
+  }
 }
 
 /* 1280×720 など、より低い高さ */
@@ -47,6 +55,13 @@
   #start-greeting-close { margin-top: 12px; }
   .cutin-panel { min-height: 250px; }
   .cutin-portrait { min-height: 250px; }
+  #table-player-cards .table-seat-card { width: 252px; padding-left: 82px; }
+  #table-player-cards .card-face { width: 76px; height: 92px; }
+  #table-player-cards #card-0 { width: 320px; padding-left: 94px; }
+  #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
+    width: 101px;
+    height: 58px;
+  }
 }
 
 /* 大画面(1800px以上) */

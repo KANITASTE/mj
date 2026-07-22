@@ -7,6 +7,14 @@ window.YM = window.YM || {};
   const $id = id => document.getElementById(id);
   const C = YM.CONST;
   const GS = () => YM.GameState;
+  const TABLE_PORTRAITS = Object.freeze({
+    ayano: 'assets/characters/ayano00.png',
+    lili: 'assets/characters/lili00.png',
+    masked: 'assets/characters/nazo00.png',
+    tanabe: 'assets/characters/tanabe00.png',
+    tome: 'assets/characters/tome00.png',
+    mofuzo: 'assets/characters/chipon00.png'
+  });
 
   /* ===== 画面切替 ===== */
   UI.showScreen = function (name) {
@@ -188,14 +196,18 @@ window.YM = window.YM || {};
     card.classList.toggle('active', G.currentPlayerIndex === i && G.phase !== C.PHASE.ENDED);
     card.classList.toggle('riichi', p.isRiichi || p.riichiPending);
 
-    // 顔アイコンは初回のみ描画
+    // 対局カードは選択キャラクターの専用透過立ち絵を使用する。
+    // 自分だけは既存のプロフィールアバターをそのまま引き継ぐ。
     const face = $id(`card-face-${i}`);
     const faceKey = p.isHuman
       ? `human:${YM.Storage.data.playerProfile && YM.Storage.data.playerProfile.avatar || ''}`
       : String(p.characterId);
     if (face && face.dataset.char !== faceKey) {
       face.dataset.char = faceKey;
-      face.innerHTML = YM.CharacterUI.faceIconHTML(p.characterId);
+      const portrait = !p.isHuman && TABLE_PORTRAITS[p.characterId];
+      face.innerHTML = portrait
+        ? `<img class="table-character-portrait" src="${portrait}" alt="${p.name}" draggable="false">`
+        : YM.CharacterUI.faceIconHTML(p.characterId);
     }
 
     $id(`card-name-${i}`).textContent = p.name;
@@ -222,6 +234,8 @@ window.YM = window.YM || {};
     show('btn-tsumo', humanTurn && o && !!o.tsumo, true);
     show('btn-riichi', humanTurn && o && o.riichiKinds && o.riichiKinds.length > 0 && !G.players[0].isRiichi, !G.riichiMode);
     $id('btn-riichi').textContent = G.riichiMode ? 'やめる' : 'リーチ';
+    $id('btn-riichi').setAttribute('aria-label', G.riichiMode ? 'リーチ選択をやめる' : 'リーチ');
+    $id('btn-riichi').classList.toggle('is-cancel', !!G.riichiMode);
     show('btn-kan', humanTurn && o && ((o.ankanKinds && o.ankanKinds.length > 0) || (o.kakanKinds && o.kakanKinds.length > 0)), false);
 
     show('btn-ron', calling && myCall && !!myCall.ron, true);
