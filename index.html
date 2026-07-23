@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="css/character.css?v=20260723-avatar11">
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/responsive.css?v=20260723-layout-match">
-<link rel="stylesheet" href="css/table-split.css?v=20260723-shizi03">
+<link rel="stylesheet" href="css/table-split.css?v=20260723-shizi03-fix">
 </head>
 <body>
 <div id="app">
@@ -211,7 +211,9 @@
             </div>
             <div class="river river-right" id="river-1"></div>
           </div>
-          <div class="river river-bottom" id="river-0"></div>
+          <div id="player-river-lane" aria-label="自分の捨て牌">
+            <div class="river river-bottom" id="river-0"></div>
+          </div>
 
           <!-- 副露(鳴いた牌): 卓上の各プレイヤー右側へ置く -->
           <div class="meld-row table-meld meld-bottom" id="melds-0"></div>
