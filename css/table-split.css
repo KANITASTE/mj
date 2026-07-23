@@ -463,11 +463,14 @@
  * 牌の向きは席に合わせて回転させ、河・中央装飾・手牌と重ならない位置に置く。
  * ------------------------------------------------------------------ */
 .table-meld {
+  --meld-tile-width: calc(var(--river-tile-width) * .84);
+  --meld-tile-height: calc(var(--river-tile-height) * .84);
+  --meld-face-overlap: calc(var(--meld-tile-width) * .07);
   position: absolute;
   z-index: 4;
   display: flex;
   align-items: flex-end;
-  gap: clamp(3px, .4vw, 7px);
+  gap: 0;
   flex-wrap: nowrap;
   pointer-events: none;
 }
@@ -478,12 +481,18 @@
   display: flex;
   gap: 0;
   flex-wrap: nowrap;
+  margin: 0;
 }
 
 /* 卓上の副露牌は河より少し小さめにして、卓面を圧迫しないようにする。 */
 .table-meld .tile.mini {
-  width: calc(var(--river-tile-width) * .84);
-  height: calc(var(--river-tile-height) * .84);
+  --meld-seat-rotation: 0deg;
+  --meld-call-rotation: 0deg;
+  width: var(--meld-tile-width);
+  height: var(--meld-tile-height);
+  margin-block: 0;
+  margin-inline: calc(var(--meld-face-overlap) * -1);
+  transform: rotate(calc(var(--meld-seat-rotation) + var(--meld-call-rotation)));
 }
 
 /* --- 自分(画面下): 卓の右下隅。牌は正位置。
@@ -504,7 +513,14 @@
   transform-origin: right top;
 }
 .meld-right .meld-group { flex-direction: column; }
-.meld-right .tile.mini { transform: rotate(-90deg); }
+.meld-right .tile.mini {
+  --meld-seat-rotation: -90deg;
+  margin-block: calc(
+    (var(--meld-tile-width) - var(--meld-tile-height)) / 2
+    - var(--meld-face-overlap)
+  );
+  margin-inline: 0;
+}
 
 /* --- 対面(画面上): 卓の左上隅。牌を 180 度回転。 --- */
 .meld-top {
@@ -514,7 +530,7 @@
   transform-origin: left top;
 }
 .meld-top .meld-group { flex-direction: row-reverse; }
-.meld-top .tile.mini { transform: rotate(180deg); }
+.meld-top .tile.mini { --meld-seat-rotation: 180deg; }
 
 /* --- 左家(画面左): 卓の左下隅。牌を 90 度回転。 --- */
 .meld-left {
@@ -525,12 +541,30 @@
   transform-origin: left bottom;
 }
 .meld-left .meld-group { flex-direction: column-reverse; }
-.meld-left .tile.mini { transform: rotate(90deg); }
+.meld-left .tile.mini {
+  --meld-seat-rotation: 90deg;
+  margin-block: calc(
+    (var(--meld-tile-width) - var(--meld-tile-height)) / 2
+    - var(--meld-face-overlap)
+  );
+  margin-inline: 0;
+}
 
 /* 鳴かれた牌(横向き)は席の回転に対してさらに 90 度倒す。 */
 .table-meld .tile.called-tile {
+  --meld-call-rotation: 90deg;
+  margin-inline: calc(
+    (var(--meld-tile-height) - var(--meld-tile-width)) / 2
+    - var(--meld-face-overlap)
+  );
   outline: 1px solid var(--gold);
   outline-offset: 1px;
+}
+
+.meld-left .tile.called-tile,
+.meld-right .tile.called-tile {
+  margin-block: calc(var(--meld-face-overlap) * -1);
+  margin-inline: 0;
 }
 
 /* ---------------------------------------------------------------------
@@ -1034,21 +1068,19 @@
  * 卓上の副露は既定で河サイズ(.tile.mini)だが、自分のぶんだけは
  * 手前の手牌と同じ寸法に揃える（指示画像の note より）。 */
 #melds-0.table-meld .tile.mini {
-  width: var(--player-tile-width);
-  height: var(--player-tile-height);
+  --meld-tile-width: var(--player-tile-width);
+  --meld-tile-height: var(--player-tile-height);
 }
 
-/* 副露は牌同士を密着させ、面子間だけごく小さく区切る。 */
+/* 副露は牌PNGの透明余白も相殺し、面子間を含めてひとかたまりに見せる。 */
 #melds-0.table-meld {
-  gap: 2px;
+  --meld-tile-width: var(--player-tile-width);
+  --meld-tile-height: var(--player-tile-height);
+  gap: 0;
   align-items: flex-end;
 }
 
 #melds-0.table-meld .meld-group {
   gap: 0;
-  margin: 0;
-}
-
-#melds-0.table-meld .tile {
   margin: 0;
 }

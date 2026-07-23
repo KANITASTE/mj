@@ -176,6 +176,33 @@ window.YM = window.YM || {};
   }
 
   /* --- 副露 --- */
+  function orderedMeldTiles(m, callerIndex) {
+    const tiles = m.tiles.slice();
+    if (!m.calledTile || m.from == null) return { tiles, source: '' };
+
+    const calledIndex = tiles.findIndex(t => t.id === m.calledTile.id);
+    if (calledIndex < 0) return { tiles, source: '' };
+
+    const [called] = tiles.splice(calledIndex, 1);
+    const relation = (m.from - callerIndex + 4) % 4;
+    let source = '';
+    let insertAt = calledIndex;
+
+    if (relation === 3) {
+      source = 'kamicha';
+      insertAt = 0;
+    } else if (relation === 1) {
+      source = 'shimocha';
+      insertAt = tiles.length;
+    } else if (relation === 2) {
+      source = 'toimen';
+      insertAt = Math.floor(tiles.length / 2);
+    }
+
+    tiles.splice(insertAt, 0, called);
+    return { tiles, source };
+  }
+
   function renderMelds(G, i) {
     const el = $id(`melds-${i}`);
     el.innerHTML = '';
@@ -189,7 +216,12 @@ window.YM = window.YM || {};
         group.appendChild(UI.tileEl(m.tile, { mini: true }));
         group.appendChild(UI.tileEl(0, { back: true, mini: true }));
       } else {
-        m.tiles.forEach(t => {
+        const ordered = orderedMeldTiles(m, i);
+        if (ordered.source) {
+          group.classList.add(`call-from-${ordered.source}`);
+          group.dataset.callSource = ordered.source;
+        }
+        ordered.tiles.forEach(t => {
           const opts = { mini: true, classes: [] };
           if (m.calledTile && t.id === m.calledTile.id) opts.classes.push('called-tile');
           group.appendChild(UI.tileEl(t.kind, opts));
