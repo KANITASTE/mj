@@ -42,8 +42,15 @@
 
   /* 中央装飾（taku.png の八角形装飾）の実寸割合。
    * 装飾は卓面の約 15% x 20%。情報はこの内側へ収める。 */
-  --center-deco-width: clamp(132px, 15.5vw, 196px);
-  --center-deco-height: clamp(104px, 19vh, 152px);
+  /* フレームの実寸(16:9、max 1600x900)。 */
+  --frame-w: min(100vw, calc(100vh * 16 / 9), 1600px);
+  --frame-h: min(100vh, calc(100vw * 9 / 16), 900px);
+  /* 卓面に実際に描かれている中央装飾の実測値。
+   * 卓面幅(フレームの73%)の16.4% x フレーム高の22.0%。
+   * 以前は vw/vh 基準で実際の模様より大きく、中央情報が
+   * 模様の外へはみ出す原因になっていた。 */
+  --center-deco-width: calc(var(--frame-w) * .73 * .164);
+  --center-deco-height: calc(var(--frame-h) * .22);
 
   /* 河は常に 18 枚(6x3)ぶんの領域を確保し、段が増えても動かさない。 */
   --river-cols: 6;
@@ -137,7 +144,6 @@
   grid-template-rows: minmax(70px, 1fr) clamp(50px, 6vh, 64px) 15px;
 }
 
-#player-hand-wrap,
 #action-bar {
   width: 100%;
 }
@@ -200,8 +206,9 @@
   z-index: 3;
   /* 装飾模様の内側に完全に収まるサイズ。指示画像のとおり
    * 風マーカーも含めて模様からはみ出さないようにする。 */
-  width: calc(var(--center-deco-width) * .92);
-  height: calc(var(--center-deco-height) * .86);
+  /* 模様は八角形で四隅が欠けるため、外接矩形よりさらに内側に収める。 */
+  width: calc(var(--center-deco-width) * .82);
+  height: calc(var(--center-deco-height) * .78);
   box-sizing: border-box;
   transform: translate(-50%, -50%);
   display: flex;
@@ -246,23 +253,23 @@
 
 /* 段構成: 1段目=局名 / 2段目=本場・供託 / 3段目=残り牌 / 4段目=ドラ */
 #center-plate #plate-kyoku {
-  padding: 1px 7px;
-  font-size: clamp(10px, .78vw, 13px);
-  line-height: 1.15;
+  padding: 0 5px;
+  font-size: clamp(9px, .66vw, 12px);
+  line-height: 1.1;
   white-space: nowrap;
 }
 
 #center-plate .plate-row {
-  gap: 6px;
-  font-size: clamp(8px, .58vw, 10px);
-  letter-spacing: .02em;
-  line-height: 1.1;
+  gap: 5px;
+  font-size: clamp(7px, .5vw, 9px);
+  letter-spacing: 0;
+  line-height: 1.05;
   white-space: nowrap;
 }
 
 #center-plate #plate-wall {
-  font-size: clamp(8px, .58vw, 10px);
-  line-height: 1.1;
+  font-size: clamp(7px, .5vw, 9px);
+  line-height: 1.05;
   white-space: nowrap;
 }
 
@@ -274,8 +281,8 @@
 }
 
 #center-plate .pixel-label {
-  font-size: clamp(8px, .58vw, 10px);
-  line-height: 1.1;
+  font-size: clamp(7px, .5vw, 9px);
+  line-height: 1.05;
 }
 
 /* ドラ牌が装飾外へ出ないよう、中央表示専用に一回り小さくする。 */
@@ -285,17 +292,17 @@
 }
 
 #center-plate #plate-dora .tile {
-  width: calc(var(--river-tile-width) * .72);
-  height: calc(var(--river-tile-height) * .72);
+  width: calc(var(--river-tile-width) * .62);
+  height: calc(var(--river-tile-height) * .62);
 }
 
 /* 手番マーカーは装飾の内側に収まる小さめの字にする。 */
 #center-plate .turn-arrow {
   position: absolute;
   z-index: 2;
-  width: clamp(13px, 1.05vw, 17px);
-  height: clamp(13px, 1.05vw, 17px);
-  font-size: clamp(8px, .6vw, 11px);
+  width: clamp(11px, .88vw, 15px);
+  height: clamp(11px, .88vw, 15px);
+  font-size: clamp(7px, .52vw, 10px);
   flex: 0 0 auto;
 }
 
@@ -353,9 +360,13 @@
 
 /* --- 自分(画面下・南向き): 本人の右 = 画面の右下 ---
  * 段は手前(下)へ増える。grid の行を3段固定してあるので河は動かない。 */
+/* 指示画像のとおり、自分の河は中央装飾のすぐ下に置く。
+ * 自分の副露は手牌と同寸で卓の右下を広く使うため、河はやや左寄せにして
+ * 副露と重ならないようにする（装飾の真下からは大きく外さない）。 */
 .river-bottom {
-  left: calc(50% - var(--river-span-long) / 2 + var(--center-deco-width) * .18);
-  top: var(--river-inset-y);
+  left: 50%;
+  margin-left: calc(var(--river-span-long) / -2 - var(--river-span-long) * .30);
+  top: calc(50% + var(--center-deco-height) / 2 + var(--river-clearance) * .9);
   width: var(--river-span-long);
   height: var(--river-span-short);
   grid-template-columns: repeat(var(--river-cols), var(--river-tile-width));
@@ -410,12 +421,27 @@
   height: var(--river-span-long);
   grid-template-columns: repeat(var(--river-rows), var(--river-tile-height));
   grid-template-rows: repeat(var(--river-cols), var(--river-tile-width));
+  /* 下家(西向き)の「本人から見て左→右」は画面では下→上にあたる。
+   * 牌を下の行から順に積むため、行を逆順に割り当てる。
+   * DOM の並び順(＝捨てた履歴順)は変更していない。 */
   grid-auto-flow: column;
   align-content: start;
   justify-content: start;
   transform: perspective(1000px) rotateY(-3deg) scale(.94);
   transform-origin: left center;
 }
+
+/* 6行を下から埋める（1枚目が最下段）。列は3段ぶんを順に使う。
+ * 行・列の両方を明示しないと自動配置が斜めに流れるため、18枚ぶんを固定で割り当てる。 */
+.river-right .tile:nth-child(6n+1) { grid-row: 6; }
+.river-right .tile:nth-child(6n+2) { grid-row: 5; }
+.river-right .tile:nth-child(6n+3) { grid-row: 4; }
+.river-right .tile:nth-child(6n+4) { grid-row: 3; }
+.river-right .tile:nth-child(6n+5) { grid-row: 2; }
+.river-right .tile:nth-child(6n+6) { grid-row: 1; }
+.river-right .tile:nth-child(-n+6)             { grid-column: 1; }
+.river-right .tile:nth-child(n+7):nth-child(-n+12)  { grid-column: 2; }
+.river-right .tile:nth-child(n+13)             { grid-column: 3; }
 
 /* ---------------------------------------------------------------------
  * 5-2. 副露(鳴いた牌) — 卓上の各プレイヤー右側へ配置
@@ -452,10 +478,11 @@
   height: calc(var(--river-tile-height) * .84);
 }
 
-/* --- 自分(画面下): 卓の右下隅。牌は正位置。 --- */
+/* --- 自分(画面下): 卓の右下隅。牌は正位置。
+ * 自分の副露は手牌と同寸(大きめ)なので、河の帯より下に置いて衝突を避ける。 */
 .meld-bottom {
   right: clamp(4px, 1vw, 16px);
-  bottom: clamp(2px, .8vh, 12px);
+  bottom: 0;
   flex-direction: row;
   transform-origin: right bottom;
 }
@@ -514,7 +541,10 @@
   gap: var(--sidebar-card-gap);
   padding: var(--sidebar-pad-y) var(--sidebar-pad-x);
   box-sizing: border-box;
-  overflow: hidden;
+  /* キャラクター画像が枠上へはみ出すため、縦方向は切り取らない。
+   * 横方向だけは卓面へ侵食しないようクリップする。 */
+  overflow-x: clip;
+  overflow-y: visible;
   pointer-events: none;
   background:
     radial-gradient(circle at 50% 38%, rgba(118, 35, 25, .18), transparent 45%),
@@ -574,29 +604,43 @@
   min-height: 0;
   aspect-ratio: 2.37 / 1;
   box-sizing: border-box;
-  overflow: hidden;
+  /* キャラクター画像を枠外へはみ出させるため hidden にしない。 */
+  overflow: visible;
   gap: 0;
   border: 0;
   border-radius: 0;
-  background: transparent url('../assets/ui/player/opponent_frame.png') center / 100% 100% no-repeat;
+  background: transparent;
   box-shadow: none;
   filter: drop-shadow(0 5px 9px rgba(0, 0, 0, .55));
   transition: filter .2s ease;
   pointer-events: none;
 }
 
+/* カード枠を疑似要素として最前面に描く。
+ * キャラクター画像(z-index:1)より上に来るので、肩や胴は枠の背面、
+ * 頭や髪は枠の外側へ抜けて見え、立体感が出る。 */
+#table-player-cards .table-seat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: url('../assets/ui/player/opponent_frame.png') center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 /* 画像は枠内の左右どちらかへ寄せる。座席ごとの左右分けは従来の考え方を維持。
  *   対面 / 上家 → 画像は左、文字は右
  *   下家 / 自分 → 画像は右、文字は左
- * padding で文字側の領域を確保し、画像は絶対配置で枠内に収める。 */
+ * 文字側の padding は画像幅(--face-width)から算出し、拡大しても
+ * 名前・点数・順位に重ならないようにする。 */
 #table-player-cards #card-2,
 #table-player-cards #card-3 {
-  padding: 6% 6% 6% 40%;
+  padding: 6% 5% 6% calc(var(--face-width, 36%) + 6%);
 }
 
 #table-player-cards #card-1,
 #table-player-cards #card-0 {
-  padding: 6% 40% 6% 6%;
+  padding: 6% calc(var(--face-width, 36%) + 6%) 6% 5%;
 }
 
 #table-player-cards .table-seat-card.active {
@@ -610,15 +654,19 @@
 /* --- キャラクター画像枠 ---
  * 4 枚とも同じ寸法。枠の外へはみ出させず、顔・頭・耳が切れないよう
  * object-fit: contain を基本にする。 */
-/* アバターの下端をフレームの内側線に合わせる。
- * opponent_frame.png の内側の金線は高さの約 84.7% の位置にあるため、
- * 画像枠の下端をそこへ揃え、立ち絵が線の上に立って見えるようにする。 */
+/* キャラクター画像はカードより大きく描き、頭・髪・肩を枠の外へ出す。
+ * 下端はフレーム内側の金線(高さの約84.7%)に合わせて足元を安定させ、
+ * 上方向へはみ出させることで「枠から飛び出す」演出にする。
+ * 拡大率はキャラごとに --face-scale で個別調整する。 */
 #table-player-cards .table-seat-card .card-face {
   position: absolute;
-  top: 6%;
-  bottom: 15.3%;   /* 100% - 84.7% = 内側線の位置 */
-  height: auto;
-  width: 34%;
+  z-index: 1;
+  bottom: 15.3%;            /* 内側線＝足元の基準 */
+  top: auto;
+  /* カード高の何倍まで伸ばすか。既定値はキャラ別に上書きする。 */
+  height: var(--face-scale, 1.32);
+  height: calc(100% * var(--face-scale, 1.32));
+  width: var(--face-width, 36%);
   box-sizing: border-box;
   overflow: visible;
   border: 0;
@@ -646,12 +694,37 @@
   display: block;
   width: 100%;
   height: 100%;
+  /* 縦横比は維持。足元を基準に上へ伸ばす。 */
   object-fit: contain;
   object-position: center bottom;
   image-rendering: auto;
   transform: none;
-  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .6));
+  filter: drop-shadow(0 5px 7px rgba(0, 0, 0, .66));
 }
+
+/* --- キャラクター別の拡大率・横位置の個別調整 ---
+ * 人物・覆面・猫で頭身と余白が違うため、一律倍率にせず個別に決める。
+ *   --face-scale : カード高に対する画像枠の高さ倍率（1.0 = 枠内に収まる）
+ *   --face-width : カード幅に対する画像枠の幅
+ * 立ち絵は素材ごとに余白量が異なるので、顔が隠れない範囲で調整する。 */
+#table-player-cards .table-seat-card { --face-scale: 1.34; --face-width: 36%; }
+
+/* 綾乃・リリ（人物・縦長の立ち絵）: 頭がしっかり枠上へ抜ける。 */
+#table-player-cards .table-seat-card[data-character-id="ayano"],
+#table-player-cards .table-seat-card[data-character-id="lili"] { --face-scale: 1.46; --face-width: 37%; }
+
+/* 覆面（フードで頭が高い）: 出しすぎると顔が切れるので控えめに。 */
+#table-player-cards .table-seat-card[data-character-id="masked"] { --face-scale: 1.30; --face-width: 36%; }
+
+/* 猫・もふぞう（横幅が広く頭身が低い）: 幅を広めに、高さは控えめに。 */
+#table-player-cards .table-seat-card[data-character-id="mofuzo"] { --face-scale: 1.24; --face-width: 41%; }
+
+/* 梅沢トメ・田辺（和装で肩幅が広い）。 */
+#table-player-cards .table-seat-card[data-character-id="tome"],
+#table-player-cards .table-seat-card[data-character-id="tanabe"] { --face-scale: 1.32; --face-width: 38%; }
+
+/* 自分（アバター切り抜き）: 素材の余白が少ないため控えめに。 */
+#table-player-cards #card-0 { --face-scale: 1.28; --face-width: 36%; }
 
 #table-player-cards .card-face > * {
   width: 100%;
@@ -832,8 +905,6 @@
 @media (max-height: 940px) {
   :root {
     --sidebar-card-gap: clamp(5px, .95vh, 11px);
-    --center-deco-width: clamp(126px, 15vw, 176px);
-    --center-deco-height: clamp(98px, 18.5vh, 140px);
   }
 }
 
@@ -844,8 +915,6 @@
     --table-row-bottom: clamp(136px, 18.5vh, 166px);
     --sidebar-pad-y: 8px;
     --sidebar-card-gap: 6px;
-    --center-deco-width: clamp(118px, 14.5vw, 160px);
-    --center-deco-height: clamp(92px, 18vh, 126px);
   }
 
   .table-sidebar-heading { padding-bottom: 3px; }
@@ -898,3 +967,74 @@
   object-fit: contain;
   object-position: center bottom;
 }
+
+/* ---------------------------------------------------------------------
+ * 10. 自分の手牌エリア（通常手牌 / ツモ牌 / 副露）
+ *
+ * 【左端固定の考え方】
+ * 従来は #player-hand-wrap が justify-content:center だったため、
+ * ツモ牌が1枚増えるたびに中央揃えが再計算され、手牌全体が左へ約30px
+ * ずれていた。副露が増えたときも同様に右へ動いていた。
+ *
+ * そこで手牌ラッパを「中央に置いた固定幅のレール」に変える。
+ *   - レールの幅  = 14枚ぶん（13枚 + ツモ1枚）で固定
+ *   - レール自体を margin:auto で中央に置く
+ *   - 手牌は左端(flex-start)から詰め、ツモ牌はその右隣に並ぶ
+ * これで枚数が変わってもレールの位置は動かず、左端が常に固定される。
+ * ------------------------------------------------------------------ */
+:root {
+  --hand-tsumo-gap: clamp(10px, .9vw, 18px);
+  /* 牌1枚ぶんの実効幅（重なりぶんの負マージンを差し引いた値）。 */
+  --hand-tile-step: calc(var(--player-tile-width) * .84);
+  /* 13枚ぶん + ツモ牌1枚 + その隙間 = レールの固定幅。 */
+  --hand-rail-width: calc(var(--hand-tile-step) * 12
+                        + var(--player-tile-width)
+                        + var(--hand-tsumo-gap)
+                        + var(--player-tile-width));
+}
+
+#player-hand-wrap {
+  display: flex;
+  align-items: flex-end;
+  /* 中央揃えではなく左詰め。枚数が変わっても左端が動かない。 */
+  justify-content: flex-start;
+  gap: var(--hand-tsumo-gap);
+  /* 固定幅のレールを中央に置く。 */
+  width: var(--hand-rail-width);
+  max-width: 100%;
+  margin-inline: auto;
+  height: 100%;
+  min-height: 0;
+  transform: none;
+}
+
+#player-hand {
+  display: flex;
+  gap: 0;
+  flex: 0 0 auto;
+}
+
+/* ツモ牌は常に手牌の右隣。レール幅に含めてあるので位置は動かない。 */
+#player-tsumo {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+/* 副露で手牌が減っても左端は動かない（左詰めのため）。 */
+#player-hand:empty { min-width: 0; }
+
+/* --- 自分の副露牌は通常手牌と同じ大きさにする ---
+ * 卓上の副露は既定で河サイズ(.tile.mini)だが、自分のぶんだけは
+ * 手前の手牌と同じ寸法に揃える（指示画像の note より）。 */
+#melds-0.table-meld .tile.mini {
+  width: var(--player-tile-width);
+  height: var(--player-tile-height);
+}
+
+/* 手牌と同寸になるぶん、副露どうしの間隔は少し広げて詰まりを防ぐ。 */
+#melds-0.table-meld {
+  gap: clamp(6px, .7vw, 12px);
+  align-items: flex-end;
+}
+
+#melds-0.table-meld .meld-group { gap: 0; }
