@@ -11,10 +11,36 @@ window.YM = window.YM || {};
   const Game = { G: null };
   const Round = {};
 
+  /* 新しい対局を始める前に、前対局の一時表示を必ず片付ける。 */
+  Round.resetTransientView = function () {
+    const hideIds = [
+      'oyakime-layer', 'start-greeting-layer', 'game-menu', 'chi-select',
+      'result-overlay', 'final-overlay'
+    ];
+    hideIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+    ['fx-layer', 'cutin-layer', 'announcement-layer'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.replaceChildren();
+    });
+    document.querySelectorAll('.info-card.oya-picked').forEach(el => el.classList.remove('oya-picked'));
+    const roll = document.getElementById('oyakime-roll');
+    if (roll) {
+      roll.onclick = null;
+      roll.classList.add('hidden');
+      roll.disabled = true;
+    }
+    const gameScreen = document.getElementById('screen-game');
+    if (gameScreen) gameScreen.classList.remove('is-pass-ready');
+  };
+
   /* ===== 対局開始 ===== */
   Round.startGame = function (selectedCharacterIds) {
     YM.timers.clearAll();
     YM.Animation.clear();
+    Round.resetTransientView();
     const requestedIds = selectedCharacterIds != null
       ? selectedCharacterIds
       : (Game.G && Game.G.selectedCharacterIds) ||
@@ -43,6 +69,7 @@ window.YM = window.YM || {};
     G.handNumber = 1;
     G.dealerIndex = 0;
     UI().showScreen('game');      // 卓を表示(山牌生成・配牌は親決め後)
+    UI().resetGameTable(G);       // 前対局の手牌・河・表示状態を残さない
     // 親決めイベント → 決定した親で局を開始
     Round.oyakime(function (dealerIndex) {
       G.dealerIndex = dealerIndex;

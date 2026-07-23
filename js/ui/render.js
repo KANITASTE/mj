@@ -71,6 +71,34 @@ window.YM = window.YM || {};
     renderGuide(G);
   };
 
+  /* 親決め前の新規卓を空の状態で描き直し、前対局の表示を残さない。 */
+  UI.resetGameTable = function (G) {
+    [
+      'player-hand', 'player-tsumo',
+      'hand-1', 'hand-2', 'hand-3',
+      'river-0', 'river-1', 'river-2', 'river-3',
+      'melds-0', 'melds-1', 'melds-2', 'melds-3',
+      'plate-dora'
+    ].forEach(id => {
+      const el = $id(id);
+      if (el) el.replaceChildren();
+    });
+    $id('plate-kyoku').textContent = '東一局';
+    $id('plate-honba').textContent = '0本場';
+    $id('plate-sticks').textContent = '供託 0';
+    $id('plate-wall').textContent = '山 --';
+    for (let i = 0; i < 4; i++) {
+      const arrow = $id(`turn-arrow-${i}`);
+      if (arrow) {
+        arrow.classList.remove('active');
+        arrow.textContent = YM.CONST.WIND_NAMES[(i - G.dealerIndex + 4) % 4];
+      }
+      renderInfoCard(G, i);
+    }
+    renderButtons(G);
+    renderGuide(G);
+  };
+
   /* --- 中央プレート --- */
   function renderCenterPlate(G) {
     const kyokuKanji = ['一', '二', '三', '四'][G.handNumber - 1] || G.handNumber;
@@ -258,12 +286,13 @@ window.YM = window.YM || {};
     setAction('btn-pon', canPon, 'ポン');
     setAction('btn-chi', canChi, 'チー');
     show('btn-minkan', false, false);
-    const canPass = !!((calling && myCall) || (humanTurn && o && !!o.tsumo && G.players[0].isRiichi));
-    const pass = $id('btn-pass');
-    pass.classList.remove('hidden');
-    pass.disabled = !canPass;
-    pass.setAttribute('aria-disabled', String(!canPass));
-    pass.setAttribute('aria-label', canPass ? 'パス' : 'パス（現在は選択できません）');
+    const canPass = !!(
+      G.riichiMode ||
+      (calling && myCall) ||
+      (humanTurn && o && !!o.tsumo && G.players[0].isRiichi)
+    );
+    const gameScreen = $id('screen-game');
+    if (gameScreen) gameScreen.classList.toggle('is-pass-ready', canPass);
   }
 
   function renderGuide(G) {
@@ -275,7 +304,7 @@ window.YM = window.YM || {};
       else if (G.humanOptions && G.humanOptions.afterCall) text = '鳴いた後の捨て牌を選んでください';
       else text = '牌をクリックで選択、もう一度クリックで捨てる';
     } else if (G.phase === C.PHASE.CALLS) {
-      text = '鳴きますか?';
+      text = '鳴きますか？　ボタン以外をクリックでパス';
     } else if (G.phase === C.PHASE.CPU_TURN && p && !p.isHuman) {
       text = `${p.name} が考えています……`;
     }

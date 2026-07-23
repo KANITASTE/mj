@@ -19,6 +19,7 @@ const DEBUG_MODE = true;
   Main.goTitle = function () {
     YM.timers.clearAll();
     YM.Animation.clear();
+    if (YM.Round && YM.Round.resetTransientView) YM.Round.resetTransientView();
     $id('result-overlay').classList.add('hidden');
     $id('final-overlay').classList.add('hidden');
     $id('game-menu').classList.add('hidden');
@@ -125,6 +126,7 @@ const DEBUG_MODE = true;
     if (!confirm('名前、アイコン、対戦成績、解放イベント、選択メンバー、設定をすべて初期化します。よろしいですか？')) return;
     St().reset();
     St().save();
+    if (YM.Round && YM.Round.resetTransientView) YM.Round.resetTransientView();
     applyAudioSettings();
     resetPrepInteractionState();
     refreshSettingsUI();
@@ -281,7 +283,8 @@ const DEBUG_MODE = true;
     document.querySelectorAll('[data-back]').forEach(btn => {
       btn.addEventListener('click', () => {
         AU().se('select');
-        UI().showScreen(settingsReturn === 'game' ? 'game' : settingsReturn === 'character-select' ? 'character-select' : 'title');
+        const returnToGame = settingsReturn === 'game' || settingsReturn === 'game-direct';
+        UI().showScreen(returnToGame ? 'game' : settingsReturn === 'character-select' ? 'character-select' : 'title');
         if (settingsReturn === 'game') $id('game-menu').classList.remove('hidden');
         settingsReturn = 'title';
         refreshContinue();
@@ -310,15 +313,39 @@ const DEBUG_MODE = true;
     $id('btn-pon').addEventListener('click', () => YM.Calls.onHumanDecision({ type: 'pon' }));
     $id('btn-minkan').addEventListener('click', () => YM.Calls.onHumanDecision({ type: 'kan' }));
     $id('btn-chi').addEventListener('click', () => YM.Calls.onHumanDecision({ type: 'chi' }));
-    $id('btn-pass').addEventListener('click', () => {
+    $id('game-frame').addEventListener('click', event => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest('button, .tile, input, label, a, #table-player-cards, .overlay, #oyakime-layer, #start-greeting-layer, #chi-select')) return;
+
       const g = YM.Game.G;
-      if (!g) return;
-      if (g.phase === 'calls') YM.Calls.onHumanPass();
-      else YM.Turn.onPassTsumo();
+      if (!g || g.busy) return;
+      if (g.riichiMode) {
+        YM.Turn.onRiichiButton();
+        return;
+      }
+      if (g.phase === YM.CONST.PHASE.CALLS && g.pendingCalls) {
+        const myCall = g.pendingCalls.options && g.pendingCalls.options.find(option => option.player === 0);
+        if (myCall) {
+          YM.UI.hideChiSelect();
+          YM.Calls.onHumanPass();
+        }
+        return;
+      }
+      if (g.phase === YM.CONST.PHASE.HUMAN_TURN && g.players[0].isRiichi && g.humanOptions && g.humanOptions.tsumo) {
+        YM.Turn.onPassTsumo();
+      }
     });
-    $id('btn-menu').addEventListener('click', () => {
+
+    $id('btn-table-title').addEventListener('click', () => {
       AU().se('select');
-      $id('game-menu').classList.remove('hidden');
+      Main.goTitle();
+    });
+    $id('btn-table-settings').addEventListener('click', () => {
+      AU().se('select');
+      settingsReturn = 'game-direct';
+      $id('game-menu').classList.add('hidden');
+      UI().showScreen('settings');
     });
     $id('chi-select-cancel').addEventListener('click', () => {
       UI().hideChiSelect();

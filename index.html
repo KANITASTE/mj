@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="css/character.css?v=20260721-2">
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/responsive.css?v=20260722-layout-fix">
+<link rel="stylesheet" href="css/table-split.css?v=20260723-split-layout">
 </head>
 <body>
 <div id="app">
@@ -229,8 +230,6 @@
             <button id="btn-riichi" class="action-btn action-slot" aria-label="リーチ（現在は選択できません）" aria-disabled="true" disabled>リーチ</button>
             <button id="btn-tsumo" class="action-btn action-slot" aria-label="ツモ（現在は選択できません）" aria-disabled="true" disabled>ツモ</button>
             <button id="btn-ron" class="action-btn action-slot" aria-label="ロン（現在は選択できません）" aria-disabled="true" disabled>ロン</button>
-            <button id="btn-pass" class="action-btn" aria-label="パス（現在は選択できません）" aria-disabled="true" disabled>パス</button>
-            <button id="btn-menu" class="action-btn sub">メニュー</button>
           </div>
           <div id="info-guide"></div>
         </div>
@@ -238,6 +237,10 @@
 
       <!-- 卓内の4人情報カード（添付レイアウトの四象限配置） -->
       <div id="table-player-cards">
+        <div class="table-sidebar-heading">
+          <span>YOIMACHI TABLE</span>
+          <strong>今宵の卓</strong>
+        </div>
         <div class="info-card table-seat-card" id="card-3">
           <div class="card-face" id="card-face-3"></div>
           <div class="card-body">
@@ -269,6 +272,10 @@
             <div class="card-bottom"><span class="card-score" id="card-score-1">25000</span><span class="card-rank" id="card-rank-1">1位</span><span class="riichi-chip hidden" id="card-riichi-1">立直</span></div>
           </div>
           <div class="meld-row table-card-melds" id="melds-1"></div>
+        </div>
+        <div class="table-sidebar-controls">
+          <button id="btn-table-title" class="sidebar-control">タイトルへ</button>
+          <button id="btn-table-settings" class="sidebar-control">設定</button>
         </div>
       </div>
 
