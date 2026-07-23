@@ -244,6 +244,14 @@ window.YM = window.YM || {};
     $id(`card-wind-${i}`).textContent = YM.Tiles.nameOf(p.seatWind);
     $id(`card-dealer-${i}`).classList.toggle('hidden', !GS().isDealer(G, i));
     $id(`card-riichi-${i}`).classList.toggle('hidden', !(p.isRiichi || p.riichiPending));
+    const startingDealerMark = $id(`card-starting-dealer-${i}`);
+    if (startingDealerMark) {
+      const isStartingDealer = Number.isInteger(G.startingDealerIndex) && G.startingDealerIndex === i;
+      startingDealerMark.classList.toggle('hidden', !isStartingDealer);
+      startingDealerMark.src = G.roundWind === C.SOUTH
+        ? 'assets/ui/seat/chicha-south.png'
+        : 'assets/ui/seat/chicha-east.png';
+    }
   }
 
   /* --- 操作ボタン --- */

@@ -10,13 +10,13 @@
 <link rel="stylesheet" href="css/reset.css">
 <link rel="stylesheet" href="css/common.css">
 <link rel="stylesheet" href="css/title.css">
-<link rel="stylesheet" href="css/game-start.css?v=20260722-3">
+<link rel="stylesheet" href="css/game-start.css?v=20260723-avatar11">
 <link rel="stylesheet" href="css/table.css?v=20260722-stable-hand-melds">
 <link rel="stylesheet" href="css/tiles.css?v=20260722-stage1">
-<link rel="stylesheet" href="css/character.css?v=20260721-2">
+<link rel="stylesheet" href="css/character.css?v=20260723-avatar11">
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/responsive.css?v=20260722-layout-fix">
-<link rel="stylesheet" href="css/table-split.css?v=20260723-split-layout">
+<link rel="stylesheet" href="css/table-split.css?v=20260723-seat-river">
 </head>
 <body>
 <div id="app">
@@ -49,12 +49,17 @@
       <div id="profile-error" class="prep-error" role="alert" aria-live="polite"></div>
 
       <div id="avatar-grid" class="prep-avatar-grid" role="radiogroup" aria-label="アバターを選択">
-        <button type="button" class="prep-avatar avatar-1" data-avatar="avatar-1" role="radio" aria-checked="false" aria-label="若い女性"></button>
-        <button type="button" class="prep-avatar avatar-2" data-avatar="avatar-2" role="radio" aria-checked="false" aria-label="熟女"></button>
-        <button type="button" class="prep-avatar avatar-3" data-avatar="avatar-3" role="radio" aria-checked="false" aria-label="若い男性"></button>
-        <button type="button" class="prep-avatar avatar-4" data-avatar="avatar-4" role="radio" aria-checked="false" aria-label="熟年男性"></button>
-        <button type="button" class="prep-avatar avatar-5" data-avatar="avatar-5" role="radio" aria-checked="false" aria-label="茶色の長毛猫"></button>
-        <button type="button" class="prep-avatar avatar-6" data-avatar="avatar-6" role="radio" aria-checked="false" aria-label="チャウチャウ"></button>
+        <button type="button" class="prep-avatar avatar-1" data-avatar="avatar-1" role="radio" aria-checked="false" aria-label="若い女性"><img src="assets/ui/avatars/avatar-1.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-2" data-avatar="avatar-2" role="radio" aria-checked="false" aria-label="熟女"><img src="assets/ui/avatars/avatar-2.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-3" data-avatar="avatar-3" role="radio" aria-checked="false" aria-label="若い男性"><img src="assets/ui/avatars/avatar-3.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-4" data-avatar="avatar-4" role="radio" aria-checked="false" aria-label="熟年男性"><img src="assets/ui/avatars/avatar-4.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-5" data-avatar="avatar-5" role="radio" aria-checked="false" aria-label="茶色の長毛猫"><img src="assets/ui/avatars/avatar-5.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-6" data-avatar="avatar-6" role="radio" aria-checked="false" aria-label="チャウチャウ"><img src="assets/ui/avatars/avatar-6.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-7" data-avatar="avatar-7" role="radio" aria-checked="false" aria-label="シェフ"><img src="assets/ui/avatars/avatar-7.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-8" data-avatar="avatar-8" role="radio" aria-checked="false" aria-label="女子高生"><img src="assets/ui/avatars/avatar-8.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-9" data-avatar="avatar-9" role="radio" aria-checked="false" aria-label="オオカミ"><img src="assets/ui/avatars/avatar-9.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-10" data-avatar="avatar-10" role="radio" aria-checked="false" aria-label="パンダ"><img src="assets/ui/avatars/avatar-10.png" alt=""></button>
+        <button type="button" class="prep-avatar avatar-11" data-avatar="avatar-11" role="radio" aria-checked="false" aria-label="プロ雀士"><img src="assets/ui/avatars/avatar-11.png" alt=""></button>
       </div>
 
       <div id="character-grid" class="prep-opponent-grid" role="group" aria-label="今宵の対戦相手。3人選択してください">
@@ -242,6 +247,8 @@
           <strong>今宵の卓</strong>
         </div>
         <div class="info-card table-seat-card" id="card-3">
+          <div class="seat-relation relation-upper">上家</div>
+          <img class="starting-dealer-mark hidden" id="card-starting-dealer-3" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-3"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-3">北</span><span class="card-name" id="card-name-3">左家</span><span class="dealer-mark hidden" id="card-dealer-3">親</span></div>
@@ -250,6 +257,8 @@
           <div class="meld-row table-card-melds" id="melds-3"></div>
         </div>
         <div class="info-card table-seat-card" id="card-2">
+          <div class="seat-relation relation-opposite">対面</div>
+          <img class="starting-dealer-mark hidden" id="card-starting-dealer-2" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-2"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-2">西</span><span class="card-name" id="card-name-2">対面</span><span class="dealer-mark hidden" id="card-dealer-2">親</span></div>
@@ -258,6 +267,7 @@
           <div class="meld-row table-card-melds" id="melds-2"></div>
         </div>
         <div class="info-card table-seat-card" id="card-0">
+          <img class="starting-dealer-mark hidden" id="card-starting-dealer-0" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-0"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-0">東</span><span class="card-name" id="card-name-0">あなた</span><span class="dealer-mark hidden" id="card-dealer-0">親</span></div>
@@ -266,6 +276,8 @@
           <div class="meld-row table-card-melds" id="melds-0"></div>
         </div>
         <div class="info-card table-seat-card" id="card-1">
+          <div class="seat-relation relation-lower">下家</div>
+          <img class="starting-dealer-mark hidden" id="card-starting-dealer-1" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-1"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-1">南</span><span class="card-name" id="card-name-1">右家</span><span class="dealer-mark hidden" id="card-dealer-1">親</span></div>
@@ -418,15 +430,15 @@
 <script src="js/cpu/cpu-balance.js"></script>
 <script src="js/cpu/cpu-defense.js"></script>
 <script src="js/audio/audio.js?v=20260722-4"></script>
-<script src="js/storage/storage.js?v=20260722-2"></script>
+<script src="js/storage/storage.js?v=20260723-avatar11"></script>
 <script src="js/ui/dialogue.js?v=20260722-2"></script>
 <script src="js/ui/animation.js?v=20260722-stage1"></script>
-<script src="js/ui/character-ui.js?v=20260722-4"></script>
-<script src="js/ui/render.js?v=20260722-pass-slot"></script>
+<script src="js/ui/character-ui.js?v=20260723-avatar11"></script>
+<script src="js/ui/render.js?v=20260723-seat-marker"></script>
 <script src="js/ui/result-ui.js"></script>
 <script src="js/ui/dev-panel.js?v=20260721-2"></script>
-<script src="js/game/game-state.js?v=20260722-3"></script>
-<script src="js/game/round-manager.js?v=20260722-2"></script>
+<script src="js/game/game-state.js?v=20260723-starting-dealer"></script>
+<script src="js/game/round-manager.js?v=20260723-starting-dealer"></script>
 <script src="js/game/turn-manager.js?v=20260721-2"></script>
 <script src="js/game/call-manager.js"></script>
 <script src="js/game/result-manager.js?v=20260721-2"></script>

@@ -67,6 +67,7 @@ YM.timers = {
       roundWind: C.EAST,
       handNumber: 1,          // 東n局
       dealerIndex: 0,
+      startingDealerIndex: null,
       currentPlayerIndex: 0,
       turnNumber: 0,
       honba: 0,

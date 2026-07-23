@@ -90,7 +90,7 @@ window.YM = window.YM || {};
       const avatar = YM.Storage && YM.Storage.data.playerProfile
         ? YM.Storage.data.playerProfile.avatar : '';
       return avatar
-        ? `<div class="face-icon human player-avatar ${avatar}" aria-label="プレイヤーのアバター"></div>`
+        ? `<div class="face-icon human player-avatar ${avatar}" aria-label="プレイヤーのアバター"><img class="player-avatar-image" src="assets/ui/avatars/${avatar}-table.png" alt="" draggable="false"></div>`
         : '<div class="face-icon human">私</div>';
     }
     if (ch.placeholder || !ch.images || !ch.images.normal) {

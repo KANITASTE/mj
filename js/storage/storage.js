@@ -4,7 +4,10 @@ window.YM = window.YM || {};
 
 (function () {
   const KEY = 'yoimachi_mahjong_4p_save_v1';
-  const VALID_AVATARS = ['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6'];
+  const VALID_AVATARS = [
+    'avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6',
+    'avatar-7', 'avatar-8', 'avatar-9', 'avatar-10', 'avatar-11'
+  ];
   const St = {};
 
   function defaults() {

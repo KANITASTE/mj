@@ -70,6 +70,20 @@
 .face-icon.player-avatar.avatar-5 { background-position: 12.20% 70.42%; }
 .face-icon.player-avatar.avatar-6 { background-position: 20.53% 70.42%; }
 
+.face-icon.player-avatar:has(.player-avatar-image) {
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.face-icon.player-avatar .player-avatar-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
 /* ===== 仮キャラのモノグラム(立ち絵の代替) ===== */
 .monogram {
   width: 100%;

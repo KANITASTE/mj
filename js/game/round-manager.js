@@ -73,6 +73,7 @@ window.YM = window.YM || {};
     // 親決めイベント → 決定した親で局を開始
     Round.oyakime(function (dealerIndex) {
       G.dealerIndex = dealerIndex;
+      G.startingDealerIndex = dealerIndex;
       Round.startRound(true);
     });
   };
