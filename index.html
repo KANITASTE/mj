@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="css/character.css?v=20260723-avatar11">
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/responsive.css?v=20260723-layout-match">
-<link rel="stylesheet" href="css/table-split.css?v=20260723-shizi03-fix">
+<link rel="stylesheet" href="css/table-split.css?v=20260723-hud-fix">
 </head>
 <body>
 <div id="app">
@@ -191,22 +191,20 @@
             <div class="river river-left" id="river-3"></div>
             <div id="center-plate">
               <div class="turn-arrow top" id="turn-arrow-2">西</div>
-              <div id="plate-mid">
-                <div class="turn-arrow left" id="turn-arrow-3">北</div>
-                <div id="plate-core">
-                  <div id="plate-kyoku" class="gold-plate">東一局</div>
-                  <div class="plate-row">
-                    <span id="plate-honba">0本場</span>
-                    <span id="plate-sticks">供託 0</span>
-                  </div>
-                  <div id="plate-wall" class="pixel-label">山 70</div>
-                  <div id="plate-dora-wrap">
-                    <span class="pixel-label">ドラ</span>
-                    <div id="plate-dora"></div>
-                  </div>
+              <div class="turn-arrow left" id="turn-arrow-3">北</div>
+              <div id="plate-core" class="center-hud-info">
+                <div id="plate-kyoku" class="gold-plate">東一局</div>
+                <div class="plate-row">
+                  <span id="plate-honba">0本場</span>
+                  <span id="plate-sticks">供託 0</span>
                 </div>
-                <div class="turn-arrow right" id="turn-arrow-1">南</div>
+                <div id="plate-wall" class="pixel-label">山 70</div>
+                <div id="plate-dora-wrap">
+                  <span class="pixel-label">ドラ</span>
+                  <div id="plate-dora"></div>
+                </div>
               </div>
+              <div class="turn-arrow right" id="turn-arrow-1">南</div>
               <div class="turn-arrow bottom" id="turn-arrow-0">東</div>
             </div>
             <div class="river river-right" id="river-1"></div>

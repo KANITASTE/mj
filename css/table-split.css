@@ -200,23 +200,31 @@
   display: contents;
 }
 
-/* 中央装飾そのものを唯一の情報表示コンテナとして使う。
- * 局情報・四風・残り牌・ドラは、このグリッドから外へ絶対配置しない。 */
+/* 中央装飾を3x3グリッドにし、四辺へ方角、中央へ情報列を置く。
+ * すべて通常フロー内で配置し、個別の絶対座標は使わない。 */
 #center-plate {
+  --hud-width: calc(var(--center-deco-width) * .86);
+  --hud-height: calc(var(--center-deco-height) * .82);
   position: absolute;
-  left: 50%;
-  top: calc(50% + var(--center-deco-offset-y));
+  left: calc(50% - var(--hud-width) / 2);
+  top: calc(50% + var(--center-deco-offset-y) - var(--hud-height) / 2);
   z-index: 3;
-  width: calc(var(--center-deco-width) * .82);
-  height: calc(var(--center-deco-height) * .78);
+  width: var(--hud-width);
+  height: var(--hud-height);
   box-sizing: border-box;
-  transform: translate(-50%, -50%);
+  transform: none;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  padding: 5% 8%;
+  grid-template-columns: max-content minmax(72px, 1fr) max-content;
+  grid-template-rows: max-content minmax(min-content, 1fr) max-content;
+  grid-template-areas:
+    ". west ."
+    "north info south"
+    ". east .";
+  place-items: center;
+  column-gap: clamp(5px, .45vw, 8px);
+  row-gap: 4px;
+  /* % padding は卓幅基準になり過大化するため、HUD実寸に合わせた固定レンジを使う。 */
+  padding: clamp(4px, .45vw, 7px) clamp(5px, .55vw, 9px);
   background: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(4, 12, 9, .30), transparent 72%);
   border: 0;
   border-radius: 0;
@@ -225,58 +233,58 @@
   pointer-events: none;
 }
 
-/* 上下の風と、左右の風を含む中段を通常フローで組む。 */
-#center-plate #plate-mid {
-  width: 100%;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 2px;
-}
-
 #center-plate #plate-core {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
+  grid-area: info;
+  width: 100%;
+  display: grid;
+  grid-auto-flow: row;
+  justify-items: center;
+  align-content: center;
+  row-gap: 3px;
   min-width: 0;
-  max-width: 100%;
+  min-height: 0;
+  text-align: center;
 }
 
 /* 段構成: 1段目=局名 / 2段目=本場・供託 / 3段目=残り牌 / 4段目=ドラ */
 #center-plate #plate-kyoku {
-  padding: 0 5px;
-  font-size: clamp(9px, .66vw, 12px);
-  line-height: 1.1;
+  padding: 1px 7px;
+  font-size: clamp(11px, .78vw, 14px);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: .08em;
   white-space: nowrap;
 }
 
 #center-plate .plate-row {
-  gap: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: clamp(7px, .5vw, 9px);
   letter-spacing: 0;
-  line-height: 1.05;
+  line-height: 1.3;
   white-space: nowrap;
 }
 
 #center-plate #plate-wall {
   font-size: clamp(7px, .5vw, 9px);
-  line-height: 1.05;
+  line-height: 1.3;
   white-space: nowrap;
 }
 
 #center-plate #plate-dora-wrap {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 3px;
+  min-height: calc(var(--river-tile-height) * .62);
   max-width: 100%;
 }
 
 #center-plate .pixel-label {
   font-size: clamp(7px, .5vw, 9px);
-  line-height: 1.05;
+  line-height: 1.25;
 }
 
 /* ドラ牌が装飾外へ出ないよう、中央表示専用に一回り小さくする。 */
@@ -290,20 +298,21 @@
   height: calc(var(--river-tile-height) * .62);
 }
 
-/* 手番マーカーはグリッドの一部として装飾内に収める。 */
+/* 方角は中央情報から独立した四辺のグリッド領域へ置く。 */
 #center-plate .turn-arrow {
   position: static;
   z-index: 2;
-  width: clamp(11px, .88vw, 15px);
-  height: clamp(11px, .88vw, 15px);
-  font-size: clamp(7px, .52vw, 10px);
+  width: clamp(15px, 1vw, 18px);
+  height: clamp(15px, 1vw, 18px);
+  font-size: clamp(9px, .64vw, 11px);
+  line-height: 1;
   flex: 0 0 auto;
 }
 
-#center-plate .turn-arrow.top,
-#center-plate .turn-arrow.bottom {
-  justify-self: center;
-}
+#center-plate .turn-arrow.top    { grid-area: west; }
+#center-plate .turn-arrow.right  { grid-area: south; }
+#center-plate .turn-arrow.bottom { grid-area: east; }
+#center-plate .turn-arrow.left   { grid-area: north; }
 
 /* 手番強調のアニメーションが transform を壊さないよう、影のみで表現する。 */
 #center-plate .turn-arrow.active { animation: none; }
