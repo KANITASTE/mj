@@ -1,4 +1,6 @@
 /* responsive.css - 画面サイズ対応(牌サイズ変数の切替のみ)
+ * 対局画面のレイアウト(右欄幅・カード寸法・河の位置・中央情報)は
+ * css/table-split.css の第8章で一元管理する。ここでは触れない。
  * 牌の寸法はすべて css/tiles.css の :root 変数で管理し、
  * ここでは解像度に応じて変数値を差し替える。
  * 検証対象: 1280×720 / 1366×768 / 1440×900 / 1920×1080 で
@@ -18,18 +20,8 @@
     --result-tile-width: 31px;
     --result-tile-height: 43px;
   }
-  .info-card { min-width: 160px; padding: 4px 8px; }
-  .info-card.compact { min-width: 135px; }
-  .card-face { width: 32px; height: 32px; }
   .fx-banner { font-size: 60px; }
   #player-hand-wrap { min-height: 78px; }
-  #table-player-cards .table-seat-card { width: 274px; padding-left: 90px; }
-  #table-player-cards .card-face { width: 84px; height: 102px; }
-  #table-player-cards #card-0 {
-    width: clamp(274px, 21vw, 306px);
-    padding-left: clamp(118px, 9vw, 132px);
-  }
-  #table-player-cards #card-0 .card-face { width: 76px; height: 76px; }
   #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
     width: 112px;
     height: 64px;
@@ -49,7 +41,6 @@
     --result-tile-height: 39px;
   }
   .card-line { display: none; }
-  #area-mid { grid-template-columns: minmax(105px, 150px) 1fr minmax(105px, 150px); }
   :root { --hand-gap: 2px; }   /* 小画面(タブレット等)は手牌間隔を詰める */
   .start-greeting-panel h2 { margin-bottom: 12px; }
   .start-greeting-portrait { height: 190px; }
@@ -58,9 +49,6 @@
   #start-greeting-close { margin-top: 12px; }
   .cutin-panel { min-height: 250px; }
   .cutin-portrait { min-height: 250px; }
-  #table-player-cards .table-seat-card { width: 252px; padding-left: 82px; }
-  #table-player-cards .card-face { width: 76px; height: 92px; }
-  #table-player-cards #card-0 { width: 276px; padding-left: 116px; }
   #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
     width: 101px;
     height: 58px;

@@ -352,21 +352,46 @@
   height: auto;
   min-width: 0;
   min-height: 0;
+  /* 枠は 3:4 前後にして、元画像(1188x1324 ≒ 0.897)から大きく外れないようにする。
+   * 縦横比が近いほど object-fit: cover の切り落としが減り、輪郭が素直に出る。 */
+  aspect-ratio: 1188 / 1324;
+  justify-self: center;
+  align-self: center;
+  max-width: 100%;
+  max-height: 100%;
   overflow: hidden;
   border-radius: 7px;
   background: #120c09;
+  /* 親側で拡大縮小すると子のimgが二重スケーリングになるため、変形は持たせない。 */
+  transform: none;
 }
 
 .prep-avatar-grid .prep-avatar img {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: cover;
-  object-position: center 20%;
+  /* 顔と頭が切れないよう、上寄りを基準に収める。 */
+  object-position: center 18%;
+  /* ブラウザ標準の滑らかな補間で縮小させる(pixelated/crisp-edges を明示的に解除)。 */
+  image-rendering: auto;
+  /* transform を持たせると合成レイヤ上で再スケールされ、輪郭が荒れる。 */
+  transform: none;
+  backface-visibility: visible;
   pointer-events: none;
 }
 
 .prep-avatar-grid .prep-avatar:hover img,
 .prep-avatar-grid .prep-avatar:focus-visible img {
   filter: brightness(1.08);
+  transform: none;
+}
+
+/* 押下時のスケールは枠側だけに留め、画像には伝えない。 */
+.prep-avatar-grid .prep-avatar:active {
+  transform: translateY(1px);
+}
+
+.prep-avatar-grid .prep-avatar:active img {
+  transform: none;
 }

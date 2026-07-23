@@ -71,71 +71,20 @@
 .meld-group .called-tile { outline: 1px solid var(--gold); outline-offset: 1px; }
 
 /* ===== 卓中央 ===== */
+/* 卓中央ゾーン。河の座標系としての詳細は css/table-split.css で確定する。 */
 #center-zone {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 6px 8px;
   min-width: 0;
   min-height: 0;
-  gap: clamp(6px, 1.4vh, 16px);
 }
 
-#center-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(10px, 1.6vw, 24px);
-  flex: 0 0 auto;
-  min-height: 0;
-}
-
-/* ===== 河: 中央プレートを四方から囲む捨て牌エリア =====
- * 上下は横並び6列、左右は縦並び6行。牌の向きは tiles.css で席ごとに回転する。
- * 各河は最大18枚(6枚×3段)を想定。 */
+/* ===== 河（捨て牌） =====
+ * 牌の向き(回転)は css/tiles.css、席ごとの配置は css/table-split.css が担当する。
+ * ここでは共通の並び方だけを持つ。 */
 .river {
   display: grid;
   gap: 2px 2px;
   place-items: center;
 }
-/* 自分: 6列で横並び、段は画面下方向(本人側)へ増える */
-.river-bottom {
-  grid-template-columns: repeat(6, var(--river-tile-width));
-  grid-auto-rows: var(--river-tile-height);
-  align-content: start;
-  min-width: calc(var(--river-tile-width) * 6 + 12px);
-  min-height: calc(var(--river-tile-height) + 4px);
-}
-/* 上家: 6列で横並び。段は画面上方向(本人側)へ増やす(wrap-reverse) */
-.river-top {
-  display: flex;
-  flex-wrap: wrap-reverse;
-  direction: rtl;               /* 本人視点で左→右(画面は右→左) */
-  justify-content: flex-start;  /* 2段目以降も画面右側から詰める */
-  align-content: center;
-  width: calc(var(--river-tile-width) * 6 + 12px);
-  min-height: calc(var(--river-tile-height) + 4px);
-}
-/* 左家・右家: 6行で縦並び。牌を90度回転するのでセルの縦横を入れ替える */
-.river-left, .river-right {
-  grid-auto-flow: column;
-  grid-template-rows: repeat(6, var(--river-tile-width));
-  grid-auto-columns: var(--river-tile-height);
-  justify-content: center;
-  align-content: center;
-  min-height: calc(var(--river-tile-width) * 6 + 12px);
-  min-width: calc(var(--river-tile-height) + 4px);
-}
-/* 左家は段が画面左方向(本人側)へ伸びる / 右家は既定(ltr)で画面右方向(本人側)へ伸びる */
-.river-left { direction: rtl; }
-
-/* ===== 軽い遠近感(河ラッパー全体へ弱く適用) =====
- * 自分の河が最も大きく手前、上家が最も小さく奥。強い3D変形は避ける。 */
-.river-bottom { transform: perspective(1000px) rotateX(3deg); }
-.river-top    { transform: perspective(1000px) rotateX(-3deg) scale(0.9); }
-.river-left   { transform: perspective(1000px) rotateY(3deg)  scale(0.94); }
-.river-right  { transform: perspective(1000px) rotateY(-3deg) scale(0.94); }
 
 /* 中央プレート */
 #center-plate {
@@ -346,35 +295,13 @@
 /* ===== 卓内4人カード =====
  * 左家=左上、対面=右上、自分=左下、右家=右下。四方の手牌から離し、
  * 添付ラフのように卓面の四象限へ置く。 */
+/* 4人カードの器。実際の配置・寸法は css/table-split.css で確定する。 */
 #table-player-cards {
   position: absolute;
   inset: 0;
   z-index: 9;
   pointer-events: none;
 }
-#table-player-cards .table-seat-card {
-  position: absolute;
-  width: clamp(180px, 15.5vw, 220px);
-  min-width: 0;
-  max-width: none;
-  min-height: 78px;
-  padding: 7px 10px;
-  gap: 10px;
-  border-color: rgba(214,178,106,.72);
-  background: linear-gradient(145deg, rgba(25,17,12,.97), rgba(7,6,5,.96));
-  box-shadow: 0 8px 24px rgba(0,0,0,.52), inset 0 0 0 2px rgba(176,141,74,.06);
-}
-#table-player-cards #card-3 { left: 12%; top: 12%; }
-#table-player-cards #card-2 { right: 10%; top: 12%; }
-#table-player-cards #card-0 { left: 12%; top: 58.5%; }
-#table-player-cards #card-1 { right: 10%; top: 58.5%; }
-#table-player-cards .card-face {
-  width: 62px;
-  height: 62px;
-  border-radius: 2px;
-}
-#table-player-cards .card-name { font-size: 14px; }
-#table-player-cards .card-score { font-size: 17px; }
 
 .card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .card-top { display: flex; align-items: baseline; gap: 6px; }
@@ -438,86 +365,14 @@
 }
 @keyframes line-in { from { opacity: 0; transform: translateY(3px); } }
 
-/* ===== 第1段階: 支給プレイヤーフレーム ===== */
-#table-player-cards .table-seat-card {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  width: clamp(258px, 21vw, 308px);
-  min-width: 0;
-  max-width: none;
-  min-height: 0;
-  aspect-ratio: 1328 / 378;
-  padding: 12px 22px 11px 98px;
-  gap: 0;
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  background: transparent url('../assets/ui/player/opponent_frame.png') center / 100% 100% no-repeat;
-  box-shadow: none;
-  filter: drop-shadow(0 8px 12px rgba(0,0,0,.62));
-  transition: filter .2s ease, transform .2s ease;
-}
+/* ===== 支給プレイヤーフレーム（共通の見た目のみ） =====
+ * 位置・寸法・キャラ画像の収め方は css/table-split.css が担当する。 */
 #table-player-cards .table-seat-card.active {
   filter: brightness(1.08) drop-shadow(0 0 11px rgba(255,141,39,.72)) drop-shadow(0 9px 12px rgba(0,0,0,.62));
 }
 #table-player-cards .table-seat-card.riichi {
   filter: drop-shadow(0 0 12px rgba(255,75,75,.72)) drop-shadow(0 9px 12px rgba(0,0,0,.62));
 }
-#table-player-cards #card-3 { left: 11.5%; top: 17%; }
-#table-player-cards #card-2 { left: 50%; right: auto; top: 9.2%; transform: translateX(-50%); }
-#table-player-cards #card-1 { right: 9%; top: 17%; }
-#table-player-cards #card-0 {
-  left: 1.2%;
-  top: auto;
-  bottom: .7%;
-  width: clamp(320px, 28vw, 400px);
-  aspect-ratio: 1328 / 379;
-  padding: 16px 28px 14px 108px;
-  background-image: url('../assets/ui/player/self_frame.png');
-  z-index: 2;
-}
-#table-player-cards .card-face {
-  position: absolute;
-  left: 14px;
-  bottom: 7px;
-  width: 92px;
-  height: 112px;
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-#table-player-cards .table-character-portrait {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(0 5px 5px rgba(0,0,0,.64));
-}
-#table-player-cards #card-0 .card-face {
-  left: 23px;
-  bottom: 15px;
-  width: 72px;
-  height: 72px;
-  overflow: hidden;
-  border: 1px solid rgba(255,183,88,.78);
-  border-radius: 7px;
-  background: #140c08;
-  box-shadow: 0 0 12px rgba(255,102,24,.32);
-}
-#table-player-cards .card-body {
-  position: relative;
-  z-index: 1;
-  gap: 3px;
-  text-shadow: 0 2px 3px rgba(0,0,0,.94);
-}
-#table-player-cards .card-top { gap: 7px; }
-#table-player-cards .card-wind { color: #ffcd7b; }
-#table-player-cards .card-name { font-size: 14px; color: #fff0d5; }
-#table-player-cards .card-score { font-size: 17px; color: #ffca74; }
-#table-player-cards .card-rank { color: #d9c3a3; }
-#table-player-cards .card-line { color: #c8a985; }
 
 /* ===== チー候補選択 ===== */
 #chi-select {
@@ -550,7 +405,9 @@
 .chi-option:hover { border-color: var(--gold); }
 #chi-select-cancel { padding: 5px 18px; font-size: 13px; }
 
-/* ===== 対局画面レイアウト調整（2026-07-22） ===== */
+/* ===== 対局画面レイアウト調整（2026-07-22） =====
+ * 卓面の背景画像だけをここで指定する。
+ * 中央情報・4人カード・河の配置は css/table-split.css が一元管理する。 */
 #game-frame {
   background-color: #09271d;
   background-image:
@@ -559,150 +416,6 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%, cover;
-}
-
-/* 背景に描かれた中央装飾をそのまま情報枠として使う。 */
-#center-zone {
-  transform: translateY(clamp(44px, 6vh, 58px));
-}
-#center-plate {
-  width: clamp(172px, 13.2vw, 190px);
-  height: clamp(120px, 14vh, 145px);
-  box-sizing: border-box;
-  justify-content: center;
-  gap: 0;
-  padding: 4px 8px;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-#center-plate #plate-mid { gap: 4px; }
-#center-plate #plate-core { gap: 1px; }
-#center-plate .turn-arrow {
-  width: 20px;
-  height: 20px;
-  font-size: 11px;
-}
-#center-plate .plate-row {
-  gap: 8px;
-  font-size: 10px;
-  letter-spacing: .04em;
-}
-#center-plate #plate-kyoku {
-  padding: 2px 10px;
-  font-size: 13px;
-}
-#center-plate #plate-dora-wrap { gap: 4px; }
-#center-plate .pixel-label { font-size: 10px; }
-
-/* 上段2名は同じ高さに揃える。 */
-#table-player-cards #card-3 {
-  left: 12.5%;
-  top: 14.5%;
-}
-#table-player-cards #card-2 {
-  left: auto;
-  right: 8.5%;
-  top: 14.5%;
-  transform: none;
-}
-#table-player-cards #card-1 {
-  right: 8.5%;
-  top: 61%;
-}
-
-/* 相手枠：キャラを約1.2倍にし、下辺より上へ収め、情報を右側へ分離する。 */
-#table-player-cards .table-seat-card:not(#card-0) {
-  width: clamp(300px, 22vw, 340px);
-  padding: 12px 24px 11px clamp(122px, 9.5vw, 148px);
-}
-#table-player-cards .table-seat-card:not(#card-0) .card-face {
-  left: clamp(20px, 1.5vw, 26px);
-  bottom: 16px;
-  width: clamp(96px, 7.4vw, 110px);
-  height: clamp(126px, 9.7vw, 141px);
-  overflow: hidden;
-}
-#table-player-cards .table-seat-card:not(#card-0) .table-character-portrait {
-  object-position: center bottom;
-  transform: scale(1.02);
-  transform-origin: center bottom;
-}
-#table-player-cards .table-seat-card:not(#card-0) .card-body {
-  width: 100%;
-  min-width: 0;
-  align-items: flex-start;
-  align-self: stretch;
-  justify-content: center;
-}
-
-/* 自分枠も相手と同じフレーム・寸法へ統一する。 */
-#table-player-cards #card-0 {
-  left: 12.5%;
-  top: 61%;
-  bottom: auto;
-  width: clamp(300px, 22vw, 340px);
-  aspect-ratio: 1328 / 378;
-  padding: 12px 24px 11px clamp(122px, 9.5vw, 148px);
-  background-image: url('../assets/ui/player/opponent_frame.png');
-}
-#table-player-cards #card-0 .card-face {
-  left: clamp(24px, 1.7vw, 29px);
-  bottom: 10px;
-  width: clamp(78px, 6.2vw, 92px);
-  height: clamp(78px, 6.2vw, 92px);
-  box-sizing: border-box;
-  overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-#table-player-cards #card-0 .card-body {
-  width: 100%;
-  align-items: flex-start;
-  align-self: stretch;
-  justify-content: center;
-}
-
-/* 副露牌は、それぞれのメンバー枠の右横へ縦に追加する。 */
-#table-player-cards .table-card-melds {
-  position: absolute;
-  left: calc(100% - 8px);
-  top: 50%;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  transform: translateY(-50%);
-}
-#table-player-cards .table-card-melds:empty {
-  display: none;
-}
-#table-player-cards .table-card-melds .meld-group {
-  flex-wrap: nowrap;
-}
-#table-player-cards .table-card-melds .tile.mini {
-  width: calc(var(--river-tile-width) * .78);
-  height: calc(var(--river-tile-height) * .78);
-}
-
-/* セリフ行をなくした2行構成を、枠の高さ中央へ配置する。 */
-#table-player-cards .card-top,
-#table-player-cards .card-bottom {
-  width: 100%;
-}
-#table-player-cards .card-name {
-  min-width: 0;
-}
-#table-player-cards .dealer-mark {
-  flex: 0 0 auto;
-  font-size: 22px;
-  line-height: 1.1;
-  padding: 1px 8px;
-  border-width: 2px;
 }
 
 /* 六つの主アクションは常設。利用不可時は非発光、利用可能時だけ点灯する。 */
@@ -780,55 +493,4 @@
 #action-bar .action-slot:disabled {
   opacity: .42;
   pointer-events: none;
-}
-
-@media (max-height: 800px) {
-  #table-player-cards #card-3 { top: 14.5%; }
-  #table-player-cards #card-1 { top: 61%; }
-  #table-player-cards #card-2 { top: 14.5%; }
-  #table-player-cards #card-0 { top: 61%; }
-
-  #table-player-cards .table-seat-card:not(#card-0) {
-    width: clamp(274px, 21vw, 306px);
-    padding-left: clamp(118px, 9vw, 132px);
-  }
-  #table-player-cards .table-seat-card:not(#card-0) .card-face {
-    width: clamp(96px, 7.6vw, 108px);
-    height: clamp(116px, 9.2vw, 132px);
-    bottom: 14px;
-  }
-  #table-player-cards #card-0 {
-    width: clamp(274px, 21vw, 306px);
-    padding-left: clamp(118px, 9vw, 132px);
-  }
-  #table-player-cards #card-0 .card-face {
-    width: 76px;
-    height: 76px;
-    bottom: 8px;
-  }
-}
-
-@media (max-height: 730px) {
-  #table-player-cards #card-3 { top: 14%; }
-  #table-player-cards #card-1 { top: 59%; }
-  #table-player-cards #card-2 { top: 14%; }
-  #table-player-cards #card-0 { top: 59%; }
-  #table-player-cards .table-seat-card:not(#card-0) {
-    width: 276px;
-    padding-left: 116px;
-  }
-  #table-player-cards .table-seat-card:not(#card-0) .card-face {
-    width: 94px;
-    height: 114px;
-    bottom: 12px;
-  }
-  #table-player-cards #card-0 {
-    width: 276px;
-    padding-left: 116px;
-  }
-  #table-player-cards #card-0 .card-face {
-    width: 70px;
-    height: 70px;
-    bottom: 7px;
-  }
 }
