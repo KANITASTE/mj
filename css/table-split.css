@@ -198,16 +198,18 @@
   left: 50%;
   top: 50%;
   z-index: 3;
-  width: var(--center-deco-width);
-  height: var(--center-deco-height);
+  /* 装飾模様の内側に完全に収まるサイズ。指示画像のとおり
+   * 風マーカーも含めて模様からはみ出さないようにする。 */
+  width: calc(var(--center-deco-width) * .92);
+  height: calc(var(--center-deco-height) * .86);
   box-sizing: border-box;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
-  padding: 4px 6px;
+  gap: 0;
+  padding: 0;
   /* 装飾の形を隠さないよう、背景は透明〜ごく薄い半透明にとどめる。 */
   background: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(4, 12, 9, .30), transparent 72%);
   border: 0;
@@ -218,11 +220,20 @@
   pointer-events: none;
 }
 
+/* 風マーカーを横並びにすると装飾より横に広がるため、
+ * #plate-mid は幅を持たせず、風は装飾内へ絶対配置する。 */
 #center-plate #plate-mid {
+  display: contents;   /* 幅を持たせない。子は #center-plate 基準で配置される */
+}
+
+#center-plate #plate-core {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 1px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 #center-plate #plate-core {
@@ -280,11 +291,22 @@
 
 /* 手番マーカーは装飾の内側に収まる小さめの字にする。 */
 #center-plate .turn-arrow {
-  width: clamp(15px, 1.25vw, 20px);
-  height: clamp(15px, 1.25vw, 20px);
-  font-size: clamp(9px, .68vw, 12px);
+  position: absolute;
+  z-index: 2;
+  width: clamp(13px, 1.05vw, 17px);
+  height: clamp(13px, 1.05vw, 17px);
+  font-size: clamp(8px, .6vw, 11px);
   flex: 0 0 auto;
 }
+
+/* 上下左右の風は装飾の内側の縁へ寄せる。 */
+#center-plate .turn-arrow.top    { top: 0;    left: 50%; transform: translateX(-50%); }
+#center-plate .turn-arrow.bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+#center-plate .turn-arrow.left   { left: 0;   top: 50%;  transform: translateY(-50%); }
+#center-plate .turn-arrow.right  { right: 0;  top: 50%;  transform: translateY(-50%); }
+
+/* 手番強調のアニメーションが transform を壊さないよう、影のみで表現する。 */
+#center-plate .turn-arrow.active { animation: none; }
 
 /* ---------------------------------------------------------------------
  * 5. 河 — 各プレイヤー「本人から見て右横」へ配置
@@ -393,6 +415,87 @@
   justify-content: start;
   transform: perspective(1000px) rotateY(-3deg) scale(.94);
   transform-origin: left center;
+}
+
+/* ---------------------------------------------------------------------
+ * 5-2. 副露(鳴いた牌) — 卓上の各プレイヤー右側へ配置
+ *
+ * 指示画像のとおり、鳴いた牌は右欄のカード内ではなく卓上へ置く。
+ * 位置は各プレイヤーの席から見て右手前(卓の四隅寄り)。
+ *   自分  → 卓の右下隅
+ *   右家  → 卓の右上隅
+ *   対面  → 卓の左上隅
+ *   左家  → 卓の左下隅
+ * 牌の向きは席に合わせて回転させ、河・中央装飾・手牌と重ならない位置に置く。
+ * ------------------------------------------------------------------ */
+.table-meld {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(3px, .4vw, 7px);
+  flex-wrap: nowrap;
+  pointer-events: none;
+}
+
+.table-meld:empty { display: none; }
+
+.table-meld .meld-group {
+  display: flex;
+  gap: 0;
+  flex-wrap: nowrap;
+}
+
+/* 卓上の副露牌は河より少し小さめにして、卓面を圧迫しないようにする。 */
+.table-meld .tile.mini {
+  width: calc(var(--river-tile-width) * .84);
+  height: calc(var(--river-tile-height) * .84);
+}
+
+/* --- 自分(画面下): 卓の右下隅。牌は正位置。 --- */
+.meld-bottom {
+  right: clamp(4px, 1vw, 16px);
+  bottom: clamp(2px, .8vh, 12px);
+  flex-direction: row;
+  transform-origin: right bottom;
+}
+
+/* --- 右家(画面右): 卓の右上隅。牌を -90 度回転。 --- */
+.meld-right {
+  right: clamp(4px, 1vw, 16px);
+  top: clamp(2px, .8vh, 12px);
+  flex-direction: column;
+  align-items: flex-end;
+  transform-origin: right top;
+}
+.meld-right .meld-group { flex-direction: column; }
+.meld-right .tile.mini { transform: rotate(-90deg); }
+
+/* --- 対面(画面上): 卓の左上隅。牌を 180 度回転。 --- */
+.meld-top {
+  left: clamp(4px, 1vw, 16px);
+  top: clamp(2px, .8vh, 12px);
+  flex-direction: row-reverse;
+  transform-origin: left top;
+}
+.meld-top .meld-group { flex-direction: row-reverse; }
+.meld-top .tile.mini { transform: rotate(180deg); }
+
+/* --- 左家(画面左): 卓の左下隅。牌を 90 度回転。 --- */
+.meld-left {
+  left: clamp(4px, 1vw, 16px);
+  bottom: clamp(2px, .8vh, 12px);
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  transform-origin: left bottom;
+}
+.meld-left .meld-group { flex-direction: column-reverse; }
+.meld-left .tile.mini { transform: rotate(90deg); }
+
+/* 鳴かれた牌(横向き)は席の回転に対してさらに 90 度倒す。 */
+.table-meld .tile.called-tile {
+  outline: 1px solid var(--gold);
+  outline-offset: 1px;
 }
 
 /* ---------------------------------------------------------------------
@@ -507,14 +610,17 @@
 /* --- キャラクター画像枠 ---
  * 4 枚とも同じ寸法。枠の外へはみ出させず、顔・頭・耳が切れないよう
  * object-fit: contain を基本にする。 */
+/* アバターの下端をフレームの内側線に合わせる。
+ * opponent_frame.png の内側の金線は高さの約 84.7% の位置にあるため、
+ * 画像枠の下端をそこへ揃え、立ち絵が線の上に立って見えるようにする。 */
 #table-player-cards .table-seat-card .card-face {
   position: absolute;
-  top: 5%;
-  bottom: 5%;
-  width: 33%;
-  height: 90%;
+  top: 6%;
+  bottom: 15.3%;   /* 100% - 84.7% = 内側線の位置 */
+  height: auto;
+  width: 34%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -553,6 +659,8 @@
 }
 
 /* --- 文字ブロック: 画像と重ならないよう padding 側の領域に収める --- */
+/* 文字ブロックは見本画像に合わせ、空いた側の中央へまとめる。
+ * 1行目: 風 + 名前(+親マーク) / 2行目: 点数 + 順位 */
 #table-player-cards .card-body {
   position: relative;
   z-index: 1;
@@ -561,9 +669,10 @@
   align-self: center;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
+  text-align: center;
   text-shadow: 0 2px 3px rgba(0, 0, 0, .94);
 }
 
@@ -572,9 +681,9 @@
   width: 100%;
   display: flex;
   align-items: baseline;
-  justify-content: flex-start;
+  justify-content: center;
   flex-wrap: nowrap;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -649,36 +758,8 @@
 #card-starting-dealer-1,
 #card-starting-dealer-0 { left: 6%; }
 
-/* --- 副露牌: カード内の下端へ小さく並べる（枠外へ出さない） --- */
-#table-player-cards .table-card-melds {
-  position: absolute;
-  left: auto;
-  right: 5%;
-  top: auto;
-  bottom: 3%;
-  z-index: 3;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 2px;
-  max-width: 56%;
-  overflow: hidden;
-  transform: none;
-}
-
-#table-player-cards #card-1 .table-card-melds,
-#table-player-cards #card-0 .table-card-melds {
-  left: 5%;
-  right: auto;
-}
-
-#table-player-cards .table-card-melds:empty { display: none; }
-#table-player-cards .table-card-melds .meld-group { flex-wrap: nowrap; }
-
-#table-player-cards .table-card-melds .tile.mini {
-  width: calc(var(--river-tile-width) * .52);
-  height: calc(var(--river-tile-height) * .52);
-}
+/* --- 副露牌はカード内へ置かない（卓上へ移動したため） --- */
+/* 実際の配置は「5-2. 副露(鳴いた牌)」を参照。 */
 
 /* --- 下部の 2 ボタン（横並び） --- */
 .table-sidebar-controls {

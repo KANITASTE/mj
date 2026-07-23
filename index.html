@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="css/character.css?v=20260723-avatar11">
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/responsive.css?v=20260723-layout-match">
-<link rel="stylesheet" href="css/table-split.css?v=20260723-layout-match">
+<link rel="stylesheet" href="css/table-split.css?v=20260723-shizi02">
 </head>
 <body>
 <div id="app">
@@ -212,6 +212,12 @@
             <div class="river river-right" id="river-1"></div>
           </div>
           <div class="river river-bottom" id="river-0"></div>
+
+          <!-- 副露(鳴いた牌): 卓上の各プレイヤー右側へ置く -->
+          <div class="meld-row table-meld meld-bottom" id="melds-0"></div>
+          <div class="meld-row table-meld meld-right"  id="melds-1"></div>
+          <div class="meld-row table-meld meld-top"    id="melds-2"></div>
+          <div class="meld-row table-meld meld-left"   id="melds-3"></div>
         </div>
 
         <!-- 右家CPU -->
@@ -254,7 +260,6 @@
             <div class="card-top"><span class="card-wind" id="card-wind-3">北</span><span class="card-name" id="card-name-3">左家</span><span class="dealer-mark hidden" id="card-dealer-3">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-3">25000</span><span class="card-rank" id="card-rank-3">1位</span><span class="riichi-chip hidden" id="card-riichi-3">立直</span></div>
           </div>
-          <div class="meld-row table-card-melds" id="melds-3"></div>
         </div>
         <div class="info-card table-seat-card" id="card-2">
           <div class="seat-relation relation-opposite">対面</div>
@@ -264,7 +269,6 @@
             <div class="card-top"><span class="card-wind" id="card-wind-2">西</span><span class="card-name" id="card-name-2">対面</span><span class="dealer-mark hidden" id="card-dealer-2">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-2">25000</span><span class="card-rank" id="card-rank-2">1位</span><span class="riichi-chip hidden" id="card-riichi-2">立直</span></div>
           </div>
-          <div class="meld-row table-card-melds" id="melds-2"></div>
         </div>
         <div class="info-card table-seat-card" id="card-0">
           <img class="starting-dealer-mark hidden" id="card-starting-dealer-0" src="assets/ui/seat/chicha-east.png" alt="起家">
@@ -273,7 +277,6 @@
             <div class="card-top"><span class="card-wind" id="card-wind-0">東</span><span class="card-name" id="card-name-0">あなた</span><span class="dealer-mark hidden" id="card-dealer-0">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-0">25000</span><span class="card-rank" id="card-rank-0">1位</span><span class="riichi-chip hidden" id="card-riichi-0">立直</span></div>
           </div>
-          <div class="meld-row table-card-melds" id="melds-0"></div>
         </div>
         <div class="info-card table-seat-card" id="card-1">
           <div class="seat-relation relation-lower">下家</div>
@@ -283,7 +286,6 @@
             <div class="card-top"><span class="card-wind" id="card-wind-1">南</span><span class="card-name" id="card-name-1">右家</span><span class="dealer-mark hidden" id="card-dealer-1">親</span></div>
             <div class="card-bottom"><span class="card-score" id="card-score-1">25000</span><span class="card-rank" id="card-rank-1">1位</span><span class="riichi-chip hidden" id="card-riichi-1">立直</span></div>
           </div>
-          <div class="meld-row table-card-melds" id="melds-1"></div>
         </div>
         <div class="table-sidebar-controls">
           <button id="btn-table-title" class="sidebar-control">タイトルへ</button>
@@ -433,7 +435,7 @@
 <script src="js/storage/storage.js?v=20260723-avatar11"></script>
 <script src="js/ui/dialogue.js?v=20260722-2"></script>
 <script src="js/ui/animation.js?v=20260722-stage1"></script>
-<script src="js/ui/character-ui.js?v=20260723-layout-match"></script>
+<script src="js/ui/character-ui.js?v=20260723-shizi02"></script>
 <script src="js/ui/render.js?v=20260723-seat-marker"></script>
 <script src="js/ui/result-ui.js"></script>
 <script src="js/ui/dev-panel.js?v=20260721-2"></script>

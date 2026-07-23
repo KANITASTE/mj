@@ -90,9 +90,10 @@ window.YM = window.YM || {};
       const avatar = YM.Storage && YM.Storage.data.playerProfile
         ? YM.Storage.data.playerProfile.avatar : '';
       return avatar
-        // 低解像度の -table.png(253x301) ではなく、高解像度の元画像をそのまま使う。
-        // 縮小はブラウザの通常補間に任せる（CSS 側で image-rendering: auto）。
-        ? `<div class="face-icon human player-avatar ${avatar}" aria-label="プレイヤーのアバター"><img class="player-avatar-image" src="assets/ui/avatars/${avatar}.png" alt="" draggable="false"></div>`
+        // 対局カードでは背景を透過させた -table.png を使う（CPUの *00.png と同じ扱い）。
+        // 選択画面(prep)側は高解像度の元画像 avatar-N.png をそのまま使うため、
+        // ここでの差し替えは対局中の立ち絵にのみ影響する。
+        ? `<div class="face-icon human player-avatar ${avatar}" aria-label="プレイヤーのアバター"><img class="player-avatar-image" src="assets/ui/avatars/${avatar}-table.png" alt="" draggable="false"></div>`
         : '<div class="face-icon human">私</div>';
     }
     if (ch.placeholder || !ch.images || !ch.images.normal) {
