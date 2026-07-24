@@ -1,105 +1,98 @@
 /* =====================================================================
- * table-overhead.css — 左の対局画面だけを「完全俯瞰型」へ差し替える
- * (2026-07-24)
+ * table-overhead.css — 左の対局画面を「俯瞰型・大牌」レイアウトへ
+ * (2026-07-24 しじ06 準拠版)
  *
- * 【このファイルの適用範囲】
- * table-split.css の構成のうち、**左ペイン(卓面)だけ**を上書きする。
- *   ・第2章の 73% : 27% グリッド      … 変更しない
- *   ・第6章 右側プレイヤー情報欄        … 変更しない
- *   ・第9章 右欄カードの顔アイコン調整   … 変更しない
- *   ・第7章 演出レイヤーの基準           … 変更しない
- * 触るのは第3章(卓面)・第4章(中央情報)・第5章(河/副露)と、
- * それに付随する第8章のレスポンシブのうち卓面側の値だけ。
+ * 【適用範囲】table-split.css のうち左ペイン(卓面)だけを上書きする。
+ *   右欄(第6章)・第9章・演出基準(第7章)・73%:27%の列分割は変更しない。
+ *   table-split.css 自体は1バイトも変更しない。
  *
- * 【卓面の考え方】
- * 左ペインの中に taku3.png(941x941・正方形)を1枚敷き、
- * その中心に takucenter.png を置く。卓の1辺 --ovh-table を
- * 唯一の基準寸法として、河・副露・手牌・中央情報をすべて比率で配置する。
- *
- * 章立て
- *   1. 卓の基準寸法
- *   2. 左ペインを卓の座標系にする
- *   3. 中心装飾と中央HUD
- *   4. 河(4方向)
- *   5. 副露(四隅)
- *   6. CPU手牌(卓の内周)
- *   7. 自分の手牌・アクションバー
- *   8. レスポンシブ(卓面側のみ)
+ * 【見本(しじ06.png)から採った決まりごと】
+ *   ・牌は大きく: 河 = フレーム幅の約3.0% / 手牌 = 約4.2% / 対面裏牌 = 卓の6.6%
+ *   ・河は「各家の手前」に寄せ、中央を広く空ける
+ *     - 自分  : 卓の下辺寄り(1段目が自分側、段は中央へ向かって増える)
+ *     - 対面  : 対面の手牌のすぐ下(1段目が対面側)
+ *     - 上家  : 卓の左辺寄りの縦列(やや下へオフセット)
+ *     - 下家  : 卓の右辺寄りの縦列(やや上へオフセット)
+ *   ・対面の副露は「対面の手牌の下・左端」
+ *   ・自分の副露は「手牌の右横(下の帯の右端)」— 手牌は左寄せ
+ *   ・上家/下家の副露は卓の左右余白(側面手牌の内側)へ縦に置く
+ *   ・卓画像 taku3.png は左ペイン全面に敷く(見本の全面卓面と同じ考え方)
+ *   ・中央は takucenter.png + 局情報HUD(既存素材を使用)
  * ===================================================================== */
 
 
 /* ---------------------------------------------------------------------
- * 1. 卓の基準寸法
- *
- * 左ペインの実寸は「フレーム幅の 73%」。
- * 卓はその中に収まる正方形なので、幅と高さの小さい方が1辺になる。
+ * 1. 変数
  * ------------------------------------------------------------------ */
 :root {
-  /* 左ペイン(卓面)の実寸。--frame-w / --frame-h は table-split.css の定義を使う。
-   * #game-frame は 5px の枠線を持つので、内側の実寸から引いておく。 */
+  /* 左ペインの実寸。#game-frame の枠線5px x2 を引く。 */
   --ovh-pane-w: calc((var(--frame-w) - 10px) * .73);
   --ovh-pane-h: calc(var(--frame-h) - 10px);
 
-  /* 卓の下に置く自分の手牌＋アクションバーの帯。 */
-  --ovh-lane-bottom: clamp(124px, 17vh, 168px);
-  /* 卓の上下に必ず残す隙間。 */
-  --ovh-lane-top: clamp(6px, 1.1vh, 14px);
+  /* 下の帯(自分の手牌 + アクションバー)。 */
+  --ovh-lane-bottom: clamp(126px, 18vh, 178px);
+  --ovh-lane-top: clamp(4px, .8vh, 10px);
   --ovh-lane-gap: clamp(4px, .8vh, 10px);
 
-  /* 卓の1辺。左ペインの幅と、帯を除いた高さの小さい方。 */
+  /* 卓(河・手牌・中央情報の座標系)の1辺。 */
   --ovh-table: min(
-    calc(var(--ovh-pane-w) - clamp(8px, 1.4vw, 24px)),
+    calc(var(--ovh-pane-w) - clamp(8px, 1.2vw, 20px)),
     calc(var(--ovh-pane-h) - var(--ovh-lane-top)
          - var(--ovh-lane-bottom) - var(--ovh-lane-gap))
   );
 
-  /* 卓の中心(左ペイン内での座標)。 */
-  --ovh-cx: calc(var(--ovh-pane-w) / 2);
-  --ovh-cy: calc(var(--ovh-lane-top) + var(--ovh-table) / 2);
+  /* 卓の左右にできる余白(側面手牌・左右の副露を置く)。 */
+  --ovh-margin-x: calc((var(--ovh-pane-w) - var(--ovh-table)) / 2);
 
-  /* 中心装飾 takucenter.png(256x243)。卓1辺の約23%。 */
-  --ovh-deco: calc(var(--ovh-table) * .23);
+  /* 中央装飾 takucenter.png。 */
+  --ovh-deco: calc(var(--ovh-table) * .225);
   --ovh-deco-h: calc(var(--ovh-deco) * 243 / 256);
 
-  /* 河は常に 6列 x 3段 ぶんの領域を確保する(段が増えても動かさない)。
-   * table-split.css の --river-span-* は余白込みなので、
-   * 俯瞰用に牌の実寸ちょうどで取り直す。 */
+  /* --- 牌サイズ(見本の実測比率) ---
+   * responsive.css の media 上書きより後で読むため、
+   * clamp() だけで全解像度をカバーする。 */
+  /* フレーム比だけでなく卓比の上限も併用する。卓が高さ律速の解像度
+   * (1920x1080等)でも河どうしが衝突しない: 3w + 4.125w(縦河幅) ≦ 卓の44%。 */
+  --river-tile-width: clamp(
+    26px,
+    min(calc(var(--frame-w) * .0295), calc(var(--ovh-table) * .062)),
+    48px
+  );
+  --river-tile-height: calc(var(--river-tile-width) * 1.375);
+  --player-tile-width: clamp(45px, calc(var(--frame-w) * .042), 68px);
+  --player-tile-height: calc(var(--player-tile-width) * 1.37);
+
+  /* 対面の裏牌(大)と左右の側面牌(細)。 */
+  /* 13枚 + 隙間が卓幅に収まる上限いっぱいまで大きくする(見本準拠)。 */
+  --ovh-back-w: calc(var(--ovh-table) * .072);
+  --ovh-back-h: calc(var(--ovh-back-w) * 1.32);
+  --ovh-slab-w: calc(var(--ovh-table) * .033);
+  --ovh-slab-h: calc(var(--ovh-table) * .046);
+
+  /* 河は常に 6列x3段 ぶんを確保(段が増えても動かない)。 */
   --ovh-river-long: calc(var(--river-tile-width) * 6);
   --ovh-river-short: calc(var(--river-tile-height) * 3);
 
-  /* 装飾の縁から河までの余白。4つの河は風車状に並ぶため、
-   * 対角どうしが角で触れないよう下限を設ける。 */
-  --ovh-river-gap: max(6px, calc(var(--ovh-table) * .030));
-  --ovh-river-inset: calc(var(--ovh-deco) / 2 + var(--ovh-river-gap));
-
-  /* 副露を置く帯(河の外側)。 */
-  --ovh-meld-edge: calc(var(--ovh-table) * .028);
+  /* 見本準拠の風車オフセット: 上の河は右へ、自分の河は左へずらし、
+   * 空いた側へそれぞれの副露(対面=上の左 / 自分=下の右)が入る。 */
+  --ovh-top-shift: calc(var(--ovh-table) * .09);
 }
 
 
 /* ---------------------------------------------------------------------
- * 2. 左ペインを卓の座標系にする
- *
- * table-split.css は左ペインを 上段/中段/下段 の3行に割っている。
- * 俯瞰型では「卓(正方形)」と「手牌帯」の2つで足りるので、
- * 上段を消して中段を卓に、下段を手牌帯にする。
- * grid の列(73%:27%)には一切触らない。
+ * 2. 左ペインの骨格
  * ------------------------------------------------------------------ */
-
-/* 左ペインの3行を、卓＋手牌帯の2つ分に組み替える。
- * 右欄は grid-row: 1/4 で全高を占めるため、この変更の影響を受けない。 */
 #game-frame {
   grid-template-rows: 0px minmax(0, 1fr) var(--ovh-lane-bottom);
 }
 
-/* 旧レイアウトの taku.png(横長)は使わない。左ペインの下地だけ残す。 */
+/* 卓画像は左ペイン全面へ(見本と同じ全面卓面)。 */
 #game-frame::before {
   background:
-    linear-gradient(rgba(2, 13, 10, .06), rgba(2, 13, 10, .16)),
-    radial-gradient(ellipse 72% 58% at 50% 46%, #113626 0%, #0a2419 60%, #061510 100%);
+    linear-gradient(rgba(2, 13, 10, .05), rgba(2, 13, 10, .14)),
+    url('../assets/ui/table/taku3.png') center / cover no-repeat;
 }
 
-/* 上段(対面CPUの手牌の器)は卓の中へ移すので、行としては潰す。 */
 #area-top {
   grid-row: 1;
   height: 0;
@@ -108,7 +101,6 @@
   pointer-events: none;
 }
 
-/* 中段 = 卓。ここを正方形の座標系にする。 */
 #area-mid {
   grid-row: 2;
   position: relative;
@@ -119,38 +111,7 @@
   overflow: visible;
 }
 
-/* 卓そのもの(taku3.png)。左ペインの中央上寄りへ正方形で置く。 */
-#area-mid::before {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  left: 50%;
-  top: var(--ovh-lane-top);
-  transform: translateX(-50%);
-  width: var(--ovh-table);
-  height: var(--ovh-table);
-  background: url('../assets/ui/table/taku3.png') center / 100% 100% no-repeat;
-  border-radius: 3px;
-  box-shadow:
-    0 16px 46px rgba(0, 0, 0, .70),
-    0 0 0 1px rgba(196, 148, 72, .28),
-    inset 0 0 80px rgba(0, 0, 0, .30);
-  pointer-events: none;
-}
-
-/* 左右CPUの器は卓の内周へ絶対配置する(6章)。 */
-#area-left,
-#area-right {
-  position: absolute;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  overflow: visible;
-}
-
-/* 中央ゾーンは卓と同じ正方形の座標系。河・副露・中央情報の親になる。 */
+/* 卓の座標系。河・副露(対面/自分)・中央情報の親。 */
 #center-zone {
   position: absolute;
   z-index: 1;
@@ -167,7 +128,6 @@
 
 #center-row { display: contents; }
 
-/* 下段 = 自分の手牌帯。 */
 #area-bottom {
   grid-row: 3;
   padding: 2px 10px 6px;
@@ -175,13 +135,8 @@
 
 
 /* ---------------------------------------------------------------------
- * 3. 中心装飾と中央HUD
- *
- * takucenter.png を卓の中心へ。内側の黒地(実測 横19〜84% / 縦20〜82%)へ
- * 局数・本場・供託・残り山・ドラを収める。
+ * 3. 中心装飾と中央HUD(既存素材 takucenter.png)
  * ------------------------------------------------------------------ */
-
-/* 装飾画像は #center-zone の疑似要素として描く。 */
 #center-zone::before {
   content: '';
   position: absolute;
@@ -196,7 +151,6 @@
   pointer-events: none;
 }
 
-/* 中央HUD。装飾の内側の平坦部にだけ文字を置く。 */
 #center-plate {
   position: absolute;
   z-index: 3;
@@ -210,13 +164,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* table-split.css の 3x3 グリッド指定を打ち消す。 */
   grid-template-columns: none;
   grid-template-rows: none;
   grid-template-areas: none;
   column-gap: 0;
   row-gap: 0;
-  gap: calc(var(--ovh-table) * .004);
+  gap: calc(var(--ovh-table) * .002);
   padding: 0;
   background: none;
   border: 0;
@@ -238,11 +191,10 @@
   text-align: center;
 }
 
-/* 1段目: 局名 */
 #center-plate #plate-kyoku {
   padding: 0;
   font-family: var(--serif-jp);
-  font-size: calc(var(--ovh-table) * .038);
+  font-size: calc(var(--ovh-table) * .036);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: .06em;
@@ -252,40 +204,37 @@
   white-space: nowrap;
 }
 
-/* 2段目: 本場 / 供託 */
 #center-plate .plate-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--ovh-table) * .019);
+  gap: calc(var(--ovh-table) * .018);
   font-family: var(--ui-font);
-  font-size: calc(var(--ovh-table) * .021);
+  font-size: calc(var(--ovh-table) * .019);
   line-height: 1.15;
   letter-spacing: 0;
   color: #d8c6a4;
   white-space: nowrap;
 }
 
-/* 3段目: 残り山 */
 #center-plate #plate-wall {
-  font-size: calc(var(--ovh-table) * .021);
+  font-size: calc(var(--ovh-table) * .019);
   line-height: 1.15;
   color: #cbbb99;
   white-space: nowrap;
 }
 
-/* 4段目: ドラ */
 #center-plate #plate-dora-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--ovh-table) * .008);
+  gap: calc(var(--ovh-table) * .007);
   min-height: 0;
   max-width: 100%;
 }
 
 #center-plate .pixel-label {
-  font-size: calc(var(--ovh-table) * .019);
+  font-size: calc(var(--ovh-table) * .017);
   line-height: 1.1;
   color: #b9a880;
 }
@@ -293,24 +242,22 @@
 #center-plate #plate-dora { display: flex; gap: 1px; }
 
 #center-plate #plate-dora .tile {
-  width: calc(var(--ovh-table) * .027);
-  height: calc(var(--ovh-table) * .037);
+  width: calc(var(--ovh-table) * .026);
+  height: calc(var(--ovh-table) * .036);
 }
 
-/* --- 手番マーカー(風表示) ---
- * table-split.css は grid-area で四辺へ置いていた。
- * 俯瞰型では装飾の外周4方向へ絶対配置する。 */
+/* 手番マーカー(風)。装飾の外周4方向へ。 */
 #center-plate .turn-arrow {
   position: absolute;
   z-index: 4;
   grid-area: auto;
-  width: calc(var(--ovh-table) * .044);
-  height: calc(var(--ovh-table) * .044);
+  width: calc(var(--ovh-table) * .042);
+  height: calc(var(--ovh-table) * .042);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--serif-jp);
-  font-size: calc(var(--ovh-table) * .027);
+  font-size: calc(var(--ovh-table) * .026);
   font-weight: 700;
   line-height: 1;
   color: #8a7a60;
@@ -321,24 +268,23 @@
   transition: color .2s, border-color .2s, box-shadow .2s, background .2s;
 }
 
-/* 自分=下 / 対面=上 / 上家=左 / 下家=右 */
 #center-plate .turn-arrow.bottom {
   left: 50%;
-  top: calc(100% + var(--ovh-table) * .013);
+  top: calc(100% + var(--ovh-table) * .012);
   transform: translateX(-50%);
 }
 #center-plate .turn-arrow.top {
   left: 50%;
-  bottom: calc(100% + var(--ovh-table) * .013);
+  bottom: calc(100% + var(--ovh-table) * .012);
   transform: translateX(-50%);
 }
 #center-plate .turn-arrow.left {
-  right: calc(100% + var(--ovh-table) * .013);
+  right: calc(100% + var(--ovh-table) * .012);
   top: 50%;
   transform: translateY(-50%);
 }
 #center-plate .turn-arrow.right {
-  left: calc(100% + var(--ovh-table) * .013);
+  left: calc(100% + var(--ovh-table) * .012);
   top: 50%;
   transform: translateY(-50%);
 }
@@ -353,11 +299,11 @@
 
 
 /* ---------------------------------------------------------------------
- * 4. 河(4方向) — 中心装飾を囲むように各家の正面へ
+ * 4. 河 — 各家の手前へ寄せ、中央を広く空ける(見本準拠)
  *
- *   自分 : 装飾の下 / 対面 : 装飾の上
- *   上家 : 装飾の左 / 下家 : 装飾の右
- * 常に18枚(6x3)ぶんの領域を確保するので、段が増えても位置は動かない。
+ * どの河も1段目が「本人に最も近い側」で、段は中央へ向かって増える。
+ * 縦の河(上家/下家)は見本のとおり風車状に上下へオフセットし、
+ * 対面の手牌・副露と重ならないようにする。
  * DOM順・履歴順・クリック判定は変更していない。
  * ------------------------------------------------------------------ */
 .river {
@@ -373,12 +319,13 @@
   transform-origin: center center;
 }
 
-/* --- 自分(装飾の下): 左→右、手前へ段が増える --- */
+/* --- 自分: 卓の下辺寄り。1段目が下(自分側)、段は上(中央)へ。 --- */
 #player-river-lane {
   position: absolute;
   z-index: 3;
-  left: 50%;
-  top: calc(50% + var(--ovh-river-inset));
+  left: calc(50% - var(--ovh-top-shift));
+  bottom: calc(var(--ovh-table) * .055);
+  top: auto;
   transform: translateX(-50%);
   width: var(--ovh-river-long);
   height: var(--ovh-river-short);
@@ -387,25 +334,29 @@
 #player-river-lane .river-bottom {
   position: relative;
   inset: auto;
-  left: auto;
-  top: auto;
   margin: 0;
   width: 100%;
   height: 100%;
   grid-template-columns: repeat(6, var(--river-tile-width));
   grid-template-rows: repeat(3, var(--river-tile-height));
   grid-auto-flow: row;
-  align-content: start;
+  align-content: end;
   justify-content: center;
+  direction: ltr;
   transform: none;
 }
 
-/* --- 対面(装飾の上): 本人視点の左→右は画面では右→左 --- */
+/* 1段目(最初の6枚)が最下段=自分側。 */
+#player-river-lane .river-bottom .tile:nth-child(-n+6)                 { grid-row: 3; }
+#player-river-lane .river-bottom .tile:nth-child(n+7):nth-child(-n+12) { grid-row: 2; }
+#player-river-lane .river-bottom .tile:nth-child(n+13)                 { grid-row: 1; }
+
+/* --- 対面: 手牌のすぐ下。1段目が上(対面側)、段は下(中央)へ。 --- */
 .river-top {
-  left: 50%;
+  left: calc(50% + var(--ovh-top-shift));
   right: auto;
-  top: auto;
-  bottom: calc(50% + var(--ovh-river-inset));
+  top: calc(var(--ovh-back-h) + clamp(8px, 1.2vh, 16px));
+  bottom: auto;
   transform: translateX(-50%);
   width: var(--ovh-river-long);
   height: var(--ovh-river-short);
@@ -413,152 +364,155 @@
   grid-template-columns: repeat(6, var(--river-tile-width));
   grid-template-rows: repeat(3, var(--river-tile-height));
   grid-auto-flow: row;
-  align-content: end;
+  align-content: start;
   justify-content: center;
   flex-wrap: nowrap;
   direction: rtl;
 }
 
-/* 1段目が装飾に最も近い側(下段)へ来るよう行を逆に割り当てる。 */
-.river-top .tile:nth-child(-n+6)                 { grid-row: 3; }
-.river-top .tile:nth-child(n+7):nth-child(-n+12) { grid-row: 2; }
-.river-top .tile:nth-child(n+13)                 { grid-row: 1; }
-
-/* --- 上家(装飾の左): 本人視点の左→右は画面では上→下 --- */
+/* --- 上家: 卓の左辺寄りの縦列。やや下へオフセット(風車)。
+ * 1列目が左(上家側)、列は右(中央)へ。本人視点の左→右 = 画面の上→下。 --- */
 .river-left {
-  left: auto;
-  right: calc(50% + var(--ovh-river-inset));
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%);
-  width: var(--ovh-river-short);
-  height: var(--ovh-river-long);
-  grid-template-columns: repeat(3, var(--river-tile-height));
-  grid-template-rows: repeat(6, var(--river-tile-width));
-  grid-auto-flow: column;
-  align-content: center;
-  justify-content: end;
-  direction: rtl;
-}
-
-/* 列は装飾に近い側(右端=3列目)から使う。 */
-.river-left .tile:nth-child(-n+6)                 { grid-column: 3; }
-.river-left .tile:nth-child(n+7):nth-child(-n+12) { grid-column: 2; }
-.river-left .tile:nth-child(n+13)                 { grid-column: 1; }
-
-/* --- 下家(装飾の右): 本人視点の左→右は画面では下→上 --- */
-.river-right {
-  left: calc(50% + var(--ovh-river-inset));
+  left: calc(var(--ovh-table) * .020);
   right: auto;
-  top: 50%;
+  top: calc(var(--ovh-table) * .245);
   bottom: auto;
-  transform: translateY(-50%);
+  transform: none;
   width: var(--ovh-river-short);
   height: var(--ovh-river-long);
   grid-template-columns: repeat(3, var(--river-tile-height));
   grid-template-rows: repeat(6, var(--river-tile-width));
   grid-auto-flow: column;
-  align-content: center;
+  align-content: start;
   justify-content: start;
   direction: ltr;
 }
 
-/* 行は下から、列は装飾に近い側(左端=1列目)から埋める。 */
+.river-left .tile:nth-child(-n+6)                 { grid-column: 1; }
+.river-left .tile:nth-child(n+7):nth-child(-n+12) { grid-column: 2; }
+.river-left .tile:nth-child(n+13)                 { grid-column: 3; }
+
+/* --- 下家: 卓の右辺寄りの縦列。やや上へオフセット(風車)。
+ * 1列目が右(下家側)、列は左(中央)へ。本人視点の左→右 = 画面の下→上。 --- */
+.river-right {
+  left: auto;
+  right: calc(var(--ovh-table) * .020);
+  top: auto;
+  bottom: calc(var(--ovh-table) * .245);
+  transform: none;
+  width: var(--ovh-river-short);
+  height: var(--ovh-river-long);
+  grid-template-columns: repeat(3, var(--river-tile-height));
+  grid-template-rows: repeat(6, var(--river-tile-width));
+  grid-auto-flow: column;
+  align-content: start;
+  justify-content: end;
+  direction: ltr;
+}
+
 .river-right .tile:nth-child(6n+1) { grid-row: 6; }
 .river-right .tile:nth-child(6n+2) { grid-row: 5; }
 .river-right .tile:nth-child(6n+3) { grid-row: 4; }
 .river-right .tile:nth-child(6n+4) { grid-row: 3; }
 .river-right .tile:nth-child(6n+5) { grid-row: 2; }
 .river-right .tile:nth-child(6n+6) { grid-row: 1; }
-.river-right .tile:nth-child(-n+6)                 { grid-column: 1; }
+.river-right .tile:nth-child(-n+6)                 { grid-column: 3; }
 .river-right .tile:nth-child(n+7):nth-child(-n+12) { grid-column: 2; }
-.river-right .tile:nth-child(n+13)                 { grid-column: 3; }
+.river-right .tile:nth-child(n+13)                 { grid-column: 1; }
 
 
 /* ---------------------------------------------------------------------
- * 5. 副露(四隅) — 各家の右手前
- *   自分 → 右下 / 下家 → 右上 / 対面 → 左上 / 上家 → 左下
- * 牌の向き・回転の考え方は table-split.css の方式をそのまま使う。
+ * 5. 副露 — 見本準拠の配置
+ *   対面 : 対面の手牌の下・左端(横向き180度は table-split の回転を継承)
+ *   自分 : 下の帯の右端(手牌の右横)
+ *   上家 : 卓の左余白・下寄り(縦)
+ *   下家 : 卓の右余白・上寄り(縦)
+ * 牌の回転・鳴き牌(横倒し)は table-split.css の規則をそのまま使う。
  * ------------------------------------------------------------------ */
 .table-meld {
-  --meld-tile-width: calc(var(--river-tile-width) * .80);
-  --meld-tile-height: calc(var(--river-tile-height) * .80);
+  --meld-tile-width: calc(var(--river-tile-width) * .92);
+  --meld-tile-height: calc(var(--river-tile-height) * .92);
   --meld-face-overlap: calc(var(--meld-tile-width) * .07);
   position: absolute;
   z-index: 5;
-  gap: calc(var(--ovh-table) * .008);
+  gap: calc(var(--ovh-table) * .010);
 }
 
-/* --- 自分: 卓の右下隅 --- */
+/* --- 自分: 帯の右端。手牌(左寄せ)の右横に置く。 --- */
 .meld-bottom {
   left: auto;
-  right: var(--ovh-meld-edge);
-  top: auto;
-  bottom: var(--ovh-meld-edge);
+  right: calc(-1 * var(--ovh-margin-x) + clamp(10px, 1.2vw, 22px));
+  top: calc(100% + var(--ovh-lane-gap) + clamp(2px, .6vh, 8px));
+  bottom: auto;
   flex-direction: row;
   align-items: flex-end;
   transform: none;
-  transform-origin: right bottom;
+  transform-origin: right top;
 }
 
-/* --- 下家: 卓の右上隅 --- */
-.meld-right {
-  left: auto;
-  right: var(--ovh-meld-edge);
-  top: var(--ovh-meld-edge);
-  bottom: auto;
-  transform: none;
-}
-
-/* --- 対面: 卓の左上隅 --- */
-.meld-top {
-  left: var(--ovh-meld-edge);
-  right: auto;
-  top: var(--ovh-meld-edge);
-  bottom: auto;
-  transform: none;
-}
-
-/* --- 上家: 卓の左下隅 --- */
-.meld-left {
-  left: var(--ovh-meld-edge);
-  right: auto;
-  top: auto;
-  bottom: var(--ovh-meld-edge);
-  transform: none;
-}
-
-/* 自分の副露も卓上に置くため、河と同系のサイズに揃える
- * (table-split.css 第10章の「手牌と同寸」指定を打ち消す)。 */
+/* 自分の副露は手牌よりひと回り小さく(見本準拠)。
+ * table-split 第10章の「手牌と同寸」指定を打ち消す。 */
 #melds-0.table-meld,
 #melds-0.table-meld .tile.mini {
-  --meld-tile-width: calc(var(--river-tile-width) * .92);
-  --meld-tile-height: calc(var(--river-tile-height) * .92);
+  --meld-tile-width: calc(var(--river-tile-width) * 1.0);
+  --meld-tile-height: calc(var(--river-tile-height) * 1.0);
 }
 
 #melds-0.table-meld {
-  gap: calc(var(--ovh-table) * .008);
+  gap: calc(var(--ovh-table) * .010);
   align-items: flex-end;
+}
+
+/* --- 対面: 手牌の下、上の河のすぐ左。右端を河の左縁に固定し、
+ * 副露が増えたら左(卓の左余白)へ伸びる。河とは構造的に重ならない。 --- */
+.meld-top {
+  left: auto;
+  right: calc(50% - var(--ovh-top-shift)
+              + var(--river-tile-width) * 3
+              + clamp(10px, 1vw, 18px));
+  top: calc(var(--ovh-back-h) + clamp(8px, 1.2vh, 16px));
+  bottom: auto;
+  transform: none;
+}
+
+/* --- 下家: 卓の右余白・上寄り(側面手牌の内側)。 --- */
+.meld-right {
+  left: calc(100% + clamp(8px, 1vw, 18px));
+  right: auto;
+  top: calc(var(--ovh-back-h) + clamp(10px, 1.6vh, 20px));
+  bottom: auto;
+  transform: none;
+}
+
+/* --- 上家: 卓の左余白・下寄り(側面手牌の内側)。 --- */
+.meld-left {
+  left: auto;
+  right: calc(100% + clamp(8px, 1vw, 18px));
+  top: auto;
+  bottom: clamp(8px, 1.2vh, 16px);
+  transform: none;
 }
 
 
 /* ---------------------------------------------------------------------
- * 6. CPU手牌 — 卓の内周に沿わせる
- *   対面 → 卓の上辺 / 上家 → 卓の左辺 / 下家 → 卓の右辺
+ * 6. CPU手牌 — 見本準拠
+ *   対面 : 卓の上辺いっぱいに大きめの裏牌を横一列
+ *   上家 : 左ペインの左端に細い側面牌を縦一列
+ *   下家 : 左ペインの右端に細い側面牌を縦一列
  * ------------------------------------------------------------------ */
 
-/* 対面の手牌は #area-top(高さ0)の中にあるので、卓の上辺へ絶対配置する。 */
+/* 対面: 卓の上辺。 */
 #area-top .hand-row,
 #hand-2 {
   position: absolute;
   z-index: 4;
   left: 50%;
-  top: calc(var(--ovh-lane-top) + var(--ovh-table) * .014);
+  top: calc(var(--ovh-lane-top) + clamp(2px, .5vh, 6px));
   transform: translateX(-50%);
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 1px;
+  gap: 2px;
   margin: 0;
   width: max-content;
   height: max-content;
@@ -566,9 +520,17 @@
   pointer-events: none;
 }
 
-/* 上家: 卓の左辺の内側 */
+/* 対面の裏牌は大きく。 */
+#hand-2 .tile {
+  width: var(--ovh-back-w);
+  height: var(--ovh-back-h);
+}
+
+/* 上家: 左ペインの左端(#area-left の親は #area-mid = ペイン幅)。 */
 #area-left {
-  left: calc(50% - var(--ovh-table) / 2 + var(--ovh-table) * .014);
+  position: absolute;
+  z-index: 4;
+  left: clamp(6px, .8vw, 14px);
   right: auto;
   top: calc(var(--ovh-lane-top) + var(--ovh-table) / 2);
   transform: translateY(-50%);
@@ -576,22 +538,23 @@
   height: max-content;
 }
 
-/* 下家: 卓の右辺の内側 */
+/* 下家: 左ペインの右端。 */
 #area-right {
+  position: absolute;
+  z-index: 4;
   left: auto;
-  right: calc(50% - var(--ovh-table) / 2 + var(--ovh-table) * .014);
+  right: clamp(6px, .8vw, 14px);
   top: calc(var(--ovh-lane-top) + var(--ovh-table) / 2);
   transform: translateY(-50%);
   width: max-content;
   height: max-content;
 }
 
-/* 縦積みの裏向き牌。旧レイアウトの flex:1 / justify-content:center を
- * 打ち消し、13枚ぶんの実寸だけを持つ列にする。 */
+/* 側面牌(細い横倒し)。table-split の flex:1 / center を打ち消す。 */
 .hand-col {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: flex-start;
@@ -600,21 +563,32 @@
   min-height: 0;
 }
 
+#hand-1 .tile,
+#hand-3 .tile {
+  width: var(--ovh-slab-w);
+  height: var(--ovh-slab-h);
+}
+
 
 /* ---------------------------------------------------------------------
  * 7. 自分の手牌・アクションバー
- * 卓の下の帯へ。レール幅で左端を固定する考え方は table-split.css の
- * 第10章をそのまま引き継ぐ(枚数が変わっても手牌が横へずれない)。
+ * 見本のとおり手牌は帯の左寄せ。右横に副露が入る。
+ * レール幅固定で左端が動かない考え方は table-split 第10章を継承。
  * ------------------------------------------------------------------ */
 #player-center {
-  grid-template-rows: minmax(0, 1fr) clamp(44px, 5.4vh, 58px) 14px;
+  grid-template-rows: minmax(0, 1fr) clamp(42px, 5.2vh, 56px) 14px;
   align-items: end;
   justify-items: center;
   gap: 2px;
 }
 
+/* レールを左寄せ(見本準拠)。 */
+#player-hand-wrap {
+  margin-inline: clamp(10px, 1.6vw, 30px) auto;
+}
+
 #action-bar {
-  min-height: clamp(44px, 5.4vh, 58px);
+  min-height: clamp(42px, 5.2vh, 56px);
   flex-wrap: nowrap;
 }
 
@@ -625,31 +599,31 @@
 #btn-riichi,
 #btn-tsumo,
 #btn-ron {
-  width: clamp(62px, 5.4vw, 92px);
-  height: clamp(40px, 4.9vh, 54px);
+  width: clamp(60px, 5.2vw, 90px);
+  height: clamp(38px, 4.7vh, 52px);
 }
 
 
 /* ---------------------------------------------------------------------
- * 8. レスポンシブ(卓面側のみ)
- * 右欄のカード寸法・間隔は table-split.css 第8章のまま。
+ * 8. レスポンシブ(卓面側のみ。右欄は table-split 第8章のまま)
+ * 牌サイズは clamp() が吸収するので、帯の高さだけ詰める。
  * ------------------------------------------------------------------ */
 @media (max-height: 800px) {
   :root {
-    --ovh-lane-bottom: clamp(112px, 16.5vh, 146px);
+    --ovh-lane-bottom: clamp(112px, 17vh, 148px);
   }
 }
 
 @media (max-height: 730px) {
   :root {
-    --ovh-lane-bottom: clamp(102px, 15.5vh, 130px);
+    --ovh-lane-bottom: clamp(102px, 16vh, 132px);
   }
 
-  #player-center { grid-template-rows: minmax(0, 1fr) 42px 12px; }
-  #action-bar { min-height: 42px; }
+  #player-center { grid-template-rows: minmax(0, 1fr) 40px 12px; }
+  #action-bar { min-height: 40px; }
 
   #btn-pon, #btn-chi, #btn-minkan, #btn-kan, #btn-riichi, #btn-tsumo, #btn-ron {
-    width: clamp(56px, 5vw, 80px);
-    height: clamp(36px, 4.4vh, 46px);
+    width: clamp(54px, 4.8vw, 78px);
+    height: clamp(34px, 4.2vh, 44px);
   }
 }
