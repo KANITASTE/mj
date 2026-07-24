@@ -71,14 +71,14 @@
 .meld-group .called-tile { outline: 1px solid var(--gold); outline-offset: 1px; }
 
 /* ===== 卓中央 ===== */
-/* 卓中央ゾーン。河の座標系としての詳細は css/table-overhead.css で確定する。 */
+/* 卓中央ゾーン。河の座標系としての詳細は css/table-split.css で確定する。 */
 #center-zone {
   min-width: 0;
   min-height: 0;
 }
 
 /* ===== 河（捨て牌） =====
- * 牌の向き(回転)は css/tiles.css、席ごとの配置は css/table-overhead.css が担当する。
+ * 牌の向き(回転)は css/tiles.css、席ごとの配置は css/table-split.css が担当する。
  * ここでは共通の並び方だけを持つ。 */
 .river {
   display: grid;
@@ -162,7 +162,7 @@
   height: 100%;
   min-width: 0;
 }
-/* 手牌エリアの詳細は css/table-overhead.css「8. 自分の手牌・アクションバー」を参照。
+/* 手牌エリアの詳細は css/table-split.css「第10章 自分の手牌エリア」を参照。
  * ここでは牌同士の詰め方だけを持つ。 */
 #player-hand { display: flex; gap: 0; }
 /* 牌PNGの透明余白ぶんを負マージンで詰める */
@@ -287,7 +287,7 @@
 /* ===== 卓内4人カード =====
  * 左家=左上、対面=右上、自分=左下、右家=右下。四方の手牌から離し、
  * 添付ラフのように卓面の四象限へ置く。 */
-/* 4人カードの器。実際の配置・寸法は css/table-overhead.css で確定する。 */
+/* 4人カードの器。実際の配置・寸法は css/table-split.css で確定する。 */
 #table-player-cards {
   position: absolute;
   inset: 0;
@@ -358,7 +358,7 @@
 @keyframes line-in { from { opacity: 0; transform: translateY(3px); } }
 
 /* ===== 支給プレイヤーフレーム（共通の見た目のみ） =====
- * 位置・寸法・キャラ画像の収め方は css/table-overhead.css が担当する。 */
+ * 位置・寸法・キャラ画像の収め方は css/table-split.css が担当する。 */
 #table-player-cards .table-seat-card.active {
   filter: brightness(1.08) drop-shadow(0 0 11px rgba(255,141,39,.72)) drop-shadow(0 9px 12px rgba(0,0,0,.62));
 }
@@ -399,7 +399,7 @@
 
 /* ===== 対局画面レイアウト調整（2026-07-22） =====
  * 卓面の背景画像だけをここで指定する。
- * 中央情報・4人カード・河の配置は css/table-overhead.css が一元管理する。 */
+ * 中央情報・4人カード・河の配置は css/table-split.css が一元管理する。 */
 #game-frame {
   background-color: #09271d;
   background-image:
