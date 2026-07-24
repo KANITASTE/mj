@@ -66,6 +66,7 @@ YM.timers = {
     return {
       roundWind: C.EAST,
       handNumber: 1,          // 東n局
+      roundsCompleted: 0,     // 終了した局数(0の間は順位を表示しない)
       dealerIndex: 0,
       startingDealerIndex: null,
       currentPlayerIndex: 0,

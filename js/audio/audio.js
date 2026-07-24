@@ -39,6 +39,7 @@ window.YM = window.YM || {};
       bgmPlayer.volume = normalized * BGM_VOLUME_SCALE;
       bgmPlayer.dataset.volume = String(bgmPlayer.volume);
     }
+    if (typeof applyGameBgmVolumes === 'function') applyGameBgmVolumes();
   };
 
   function ensureBgmPlayer() {
@@ -76,8 +77,9 @@ window.YM = window.YM || {};
     return player.play().then(() => true).catch(() => false);
   };
 
-  AU.stopBgm = function (forgetSource) {
+  AU.stopBgm = function (forgetSource, keepGameBgm) {
     bgmRequested = false;
+    if (!keepGameBgm && AU.stopGameBgm) AU.stopGameBgm();
     if (!bgmPlayer) return;
     bgmPlayer.pause();
     bgmPlayer.currentTime = 0;
@@ -90,6 +92,7 @@ window.YM = window.YM || {};
 
   AU.syncBgm = function () {
     AU.applyVolume();
+    if (AU.syncGameBgm) AU.syncGameBgm();
     if (!bgmPlayer || !bgmRequested || !bgmSource) return;
     if (AU.settings.bgm) bgmPlayer.play().catch(() => {});
     else bgmPlayer.pause();
@@ -103,6 +106,168 @@ window.YM = window.YM || {};
       loop: bgmPlayer ? bgmPlayer.loop : false,
       volume: bgmPlayer ? bgmPlayer.volume : 0
     };
+  };
+
+  /* ===== 対局中BGM(添付曲をランダム再生・クロスフェード) =====
+   * ・assets/audio/bgm1〜4.mp3 をシャッフル順で連続再生する。
+   * ・曲の頭はフェードイン、終わり際は次の曲へクロスフェードして
+   *   つなぎ目が自然に聞こえるようにする。
+   * ・音量設定/BGM ON/OFF は既存の settings と連動する。 */
+  const GAME_BGM_TRACKS = [
+    'assets/audio/bgm1.mp3',
+    'assets/audio/bgm2.mp3',
+    'assets/audio/bgm3.mp3',
+    'assets/audio/bgm4.mp3'
+  ];
+  const GAME_BGM_FADE_SEC = 2.6;   // クロスフェード時間
+  const GAME_BGM_TICK_MS = 60;
+
+  let gameBgm = null; // { players:[a,b], active, queue:[], fading, timer }
+
+  function gameBgmBaseVolume() {
+    const normalized = Math.max(0, Math.min(100, Number(AU.settings.volume) || 0)) / 100;
+    return normalized * BGM_VOLUME_SCALE;
+  }
+
+  function makeGameBgmPlayer(tag) {
+    const el = document.createElement('audio');
+    el.id = `ym-game-bgm-${tag}`;
+    el.hidden = true;
+    el.preload = 'auto';
+    el.loop = false;
+    el.setAttribute('aria-hidden', 'true');
+    el.dataset.fade = '0';       // 0〜1 のフェード係数
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function ensureGameBgm() {
+    if (gameBgm) return gameBgm;
+    gameBgm = {
+      players: [makeGameBgmPlayer('a'), makeGameBgmPlayer('b')],
+      active: 0,
+      queue: [],
+      fading: false,
+      timer: null
+    };
+    return gameBgm;
+  }
+
+  function refillGameBgmQueue(excludeSrc) {
+    const order = GAME_BGM_TRACKS.slice();
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    // 直前の曲と同じ曲が続かないよう先頭だけ調整
+    if (excludeSrc && order.length > 1 && excludeSrc.endsWith(order[0].split('/').pop())) {
+      [order[0], order[1]] = [order[1], order[0]];
+    }
+    return order;
+  }
+
+  function applyGameBgmVolumes() {
+    if (!gameBgm) return;
+    const base = gameBgmBaseVolume();
+    gameBgm.players.forEach(p => {
+      p.volume = Math.max(0, Math.min(1, base * (parseFloat(p.dataset.fade) || 0)));
+    });
+  }
+
+  function startGameBgmTrack(playerIndex, fadeIn) {
+    const g = ensureGameBgm();
+    if (g.queue.length === 0) {
+      const current = g.players[g.active] ? g.players[g.active].currentSrc : '';
+      g.queue = refillGameBgmQueue(current);
+    }
+    const src = g.queue.shift();
+    const p = g.players[playerIndex];
+    p.src = src;
+    p.currentTime = 0;
+    p.dataset.fade = fadeIn ? '0' : '1';
+    applyGameBgmVolumes();
+    if (AU.settings.bgm) p.play().catch(() => {});
+  }
+
+  function gameBgmTick() {
+    const g = gameBgm;
+    if (!g) return;
+    const cur = g.players[g.active];
+    const other = g.players[1 - g.active];
+    const step = (GAME_BGM_TICK_MS / 1000) / GAME_BGM_FADE_SEC;
+
+    // フェードイン中の曲を持ち上げる
+    [cur, other].forEach(p => {
+      const target = p === cur ? 1 : 0;
+      let f = parseFloat(p.dataset.fade) || 0;
+      if (p === cur && f < 1) f = Math.min(1, f + step);
+      if (p === other && !g.fading && f > 0) f = Math.max(0, f - step);
+      p.dataset.fade = String(f);
+    });
+
+    // 曲の終わり際 → 次の曲へクロスフェード開始
+    if (!g.fading && cur.duration && isFinite(cur.duration) &&
+        cur.duration - cur.currentTime <= GAME_BGM_FADE_SEC) {
+      g.fading = true;
+      g.active = 1 - g.active;
+      startGameBgmTrack(g.active, true);
+    }
+
+    // クロスフェード進行: 旧トラックを下げ、消えたら停止
+    if (g.fading) {
+      const old = g.players[1 - g.active];
+      let of = parseFloat(old.dataset.fade) || 0;
+      of = Math.max(0, of - step);
+      old.dataset.fade = String(of);
+      if (of <= 0) {
+        old.pause();
+        old.removeAttribute('src');
+        old.load();
+        g.fading = false;
+      }
+    }
+
+    // 再生が止まったまま終端に達した場合の保険(タブ復帰など)
+    if (cur.ended) {
+      g.active = 1 - g.active;
+      startGameBgmTrack(g.active, true);
+    }
+
+    applyGameBgmVolumes();
+  }
+
+  AU.playGameBgm = function () {
+    // 準備画面のループBGMは止めて対局用プレイリストに切り替える
+    AU.stopBgm(true, true);
+    const g = ensureGameBgm();
+    if (g.timer) clearInterval(g.timer);
+    g.players.forEach(p => { p.pause(); p.dataset.fade = '0'; });
+    g.queue = refillGameBgmQueue('');
+    g.fading = false;
+    g.active = 0;
+    startGameBgmTrack(0, true); // フェードインで開始
+    g.timer = setInterval(gameBgmTick, GAME_BGM_TICK_MS);
+  };
+
+  AU.stopGameBgm = function () {
+    if (!gameBgm) return;
+    if (gameBgm.timer) clearInterval(gameBgm.timer);
+    gameBgm.timer = null;
+    gameBgm.fading = false;
+    gameBgm.players.forEach(p => {
+      p.pause();
+      p.removeAttribute('src');
+      p.load();
+      p.dataset.fade = '0';
+    });
+  };
+
+  AU.syncGameBgm = function () {
+    if (!gameBgm || !gameBgm.timer) return;
+    const cur = gameBgm.players[gameBgm.active];
+    if (AU.settings.bgm) { if (cur.src) cur.play().catch(() => {}); }
+    else gameBgm.players.forEach(p => p.pause());
+    applyGameBgmVolumes();
   };
 
   function tone(freq, dur, type, vol, delay, slideTo) {

@@ -80,8 +80,9 @@
    *     横方向 = 対面の奥行き / 縦方向 = 対面の幅。 */
   --ovh-slab-w: var(--ovh-back-h);
   --ovh-slab-h: var(--ovh-back-w);
-  /* (3) 上家・下家の牌と外枠の間に、対面と同程度のすきまを開ける。 */
-  --ovh-side-inset: clamp(12px, 1.4vh, 20px);
+  /* (3) 上家・下家の牌と外枠の間に、対面と同程度のすきまを開ける。
+   * (2026-07-24) さらに1牌分(--ovh-slab-w)中央へ寄せる。 */
+  --ovh-side-inset: calc(clamp(12px, 1.4vh, 20px) + var(--ovh-slab-w));
 
   /* 河は常に 6列x3段 ぶんを確保(段が増えても動かない)。 */
   --ovh-river-long: calc(var(--river-tile-width) * 6);
@@ -377,11 +378,14 @@
   margin: 0;
   width: 100%;
   height: 100%;
+  /* 列は max-content: 左詰めで置くため後続の空列が潰れても既存牌は
+   * 動かず、リーチの横倒し牌がある列だけ広がる。 */
   grid-template-columns: repeat(6, max-content);
   grid-template-rows: repeat(3, var(--river-tile-height));
   grid-auto-flow: row;
   align-content: end;
-  justify-content: center;
+  /* (3) 捨てるたびに段が中央へ寄り直さないよう、左端(打ち出し位置)固定。 */
+  justify-content: start;
   direction: ltr;
   transform: none;
 }
@@ -405,7 +409,8 @@
   grid-template-rows: repeat(3, var(--river-tile-height));
   grid-auto-flow: row;
   align-content: start;
-  justify-content: center;
+  /* (3) 対面も1枚目(画面右端)からの置き位置を固定。 */
+  justify-content: start;
   flex-wrap: nowrap;
   direction: rtl;
 }
@@ -444,14 +449,15 @@
   left: auto;
   right: calc(var(--ovh-table) * .020);
   top: auto;
-  bottom: calc(var(--ovh-table) * .222);
+  bottom: calc(var(--ovh-table) * .210);
   transform: none;
   width: var(--ovh-river-short);
   height: var(--ovh-river-long);
   grid-template-columns: repeat(3, var(--river-tile-height));
   grid-template-rows: repeat(6, max-content);
   grid-auto-flow: column;
-  align-content: start;
+  /* (3) 1枚目(最下段)の位置を固定するため下端に寄せる。 */
+  align-content: end;
   justify-content: end;
   direction: ltr;
 }
@@ -525,7 +531,7 @@
  * 手牌の左端が右へ退き、副露と重ならない(4副露まで検証)。 --- */
 .meld-top {
   left: calc(-1 * var(--ovh-margin-x) + var(--ovh-side-inset)
-        + var(--ovh-slab-w) + clamp(10px, 1vw, 18px));
+        + var(--ovh-slab-w) + clamp(16px, 1.6vw, 26px));
   right: auto;
   top: clamp(2px, .5vh, 8px);
   bottom: auto;
@@ -540,7 +546,7 @@
 .meld-right {
   left: auto;
   right: calc(-1 * var(--ovh-margin-x) + var(--ovh-side-inset)
-         + var(--ovh-slab-w) + clamp(10px, 1.2vw, 18px));
+         + var(--ovh-slab-w) + clamp(16px, 1.6vw, 26px));
   top: clamp(2px, .5vh, 8px);
   bottom: auto;
   transform: none;
@@ -549,10 +555,11 @@
 /* --- 上家: 本人視点の右隣り = 画面の下。左余白の下端(側面手牌の内側)。 --- */
 .meld-left {
   left: calc(-1 * var(--ovh-margin-x) + var(--ovh-side-inset)
-        + var(--ovh-slab-w) + clamp(10px, 1.2vw, 18px));
+        + var(--ovh-slab-w) + clamp(16px, 1.6vw, 26px));
   right: auto;
   top: auto;
-  bottom: clamp(2px, .5vh, 8px);
+  /* 低い画面では自分の手牌が卓の縁に少しかかるため、その上に置く。 */
+  bottom: clamp(14px, 2.2vh, 22px);
   transform: none;
 }
 
@@ -815,4 +822,54 @@ body:has(#screen-game.active) #crt-overlay {
     width: clamp(54px, 4.8vw, 78px);
     height: clamp(34px, 4.2vh, 44px);
   }
+}
+
+/* =====================================================================
+ * 9. 2026-07-24 追加分
+ * ================================================================== */
+
+/* --- (2) 起家マーク(卓上) ---
+ * 実卓と同じく起家の右手側の卓の縁に置く。各席の「右」は
+ *   自分=画面右下 / 下家=画面右上 / 対面=画面左上 / 上家=画面左下。
+ * 対面の右手側(左上)は副露が伸びてくるため、少し下げて重なりを避ける。
+ * マークの向きは各プレーヤーが読める向きに回転させる。 */
+.table-chicha {
+  position: absolute;
+  z-index: 4;
+  width: calc(var(--ovh-table) * .055);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(255, 112, 20, .6)) drop-shadow(0 2px 3px rgba(0, 0, 0, .6));
+  pointer-events: none;
+  user-select: none;
+}
+
+#table-chicha-0 {
+  right: calc(var(--ovh-table) * .012);
+  bottom: calc(var(--ovh-table) * .012);
+}
+
+#table-chicha-1 {
+  right: calc(var(--ovh-table) * .012);
+  /* 対面の手牌が卓の右上隅近くまで伸びるため、その下に置く。 */
+  top: calc(var(--ovh-back-h) + var(--ovh-table) * .022);
+  transform: rotate(-90deg);
+}
+
+#table-chicha-2 {
+  left: calc(var(--ovh-table) * .012);
+  top: calc(var(--ovh-table) * .115);
+  transform: rotate(180deg);
+}
+
+#table-chicha-3 {
+  left: calc(var(--ovh-table) * .012);
+  bottom: calc(var(--ovh-table) * .012);
+  transform: rotate(90deg);
+}
+
+/* --- (7) 席関係ラベル(対面・下家・上家)を2pt大きく --- */
+#table-player-cards .seat-relation,
+.seat-relation {
+  font-size: clamp(11px, calc(.72vw + 2px), 14px);
 }

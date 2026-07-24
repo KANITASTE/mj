@@ -153,7 +153,10 @@ window.YM = window.YM || {};
       return;
     }
     if (g.riichiMode && !g.riichiValidKinds.includes(tile.kind)) return;
-    if (g.selectedIndex === index) {
+    // 設定「打牌操作」: 1クリック=即打牌 / 2クリック=選択→確認(既定)
+    const singleClick = YM.Storage && YM.Storage.data &&
+      YM.Storage.data.settings && YM.Storage.data.settings.discard === 'single';
+    if (singleClick || g.selectedIndex === index) {
       if (index === 'drawn') Turn.discardDrawn(0, g.riichiMode);
       else Turn.discardFromHand(0, index, g.riichiMode);
     } else {

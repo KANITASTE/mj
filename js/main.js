@@ -210,6 +210,10 @@ const DEBUG_MODE = true;
     $id('set-se').classList.toggle('off', !s.se);
     $id('set-volume').value = s.volume;
     $id('set-volume-val').textContent = s.volume;
+    if ($id('set-discard')) {
+      $id('set-discard').textContent = s.discard === 'single' ? '1クリック' : '2クリック';
+      $id('set-discard').classList.toggle('off', s.discard === 'single');
+    }
     refreshPrepSettingsUI();
   }
 
@@ -238,6 +242,13 @@ const DEBUG_MODE = true;
       St().save(); applyAudioSettings();
       $id('set-volume-val').textContent = e.target.value;
     });
+    if ($id('set-discard')) {
+      $id('set-discard').addEventListener('click', () => {
+        const s = St().data.settings;
+        s.discard = s.discard === 'single' ? 'double' : 'single';
+        St().save(); refreshSettingsUI(); AU().se('select');
+      });
+    }
     $id('set-reset').addEventListener('click', resetSaveData);
   }
 

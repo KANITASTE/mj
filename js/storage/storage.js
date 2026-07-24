@@ -19,7 +19,7 @@ window.YM = window.YM || {};
       unlockedEvents: [],
       selectedCharacters: [],
       playerProfile: { name: '', avatar: '' },
-      settings: { bgm: true, se: true, volume: 60 }
+      settings: { bgm: true, se: true, volume: 60, discard: 'double' }
     };
   }
 
@@ -49,6 +49,7 @@ window.YM = window.YM || {};
       St.data.settings.se = St.data.settings.se !== false;
       const volume = Number(St.data.settings.volume);
       St.data.settings.volume = Number.isFinite(volume) ? Math.max(0, Math.min(100, Math.round(volume))) : 60;
+      St.data.settings.discard = St.data.settings.discard === 'single' ? 'single' : 'double';
       St.data.playerProfile = Object.assign(defaults().playerProfile, St.data.playerProfile || {});
       St.data.playerProfile.name = typeof St.data.playerProfile.name === 'string'
         ? St.data.playerProfile.name.trim().slice(0, 12) : '';

@@ -272,15 +272,19 @@ window.YM = window.YM || {};
 
     $id(`card-name-${i}`).textContent = p.name;
     $id(`card-score-${i}`).textContent = p.score;
-    $id(`card-rank-${i}`).textContent = `${ranks[i]}位`;
+    const rankEl = $id(`card-rank-${i}`);
+    rankEl.textContent = `${ranks[i]}位`;
+    // (8) 開局直後は順位を出さず、1局終わってから表示する。
+    rankEl.classList.toggle('hidden', !(G.roundsCompleted > 0));
     $id(`card-wind-${i}`).textContent = YM.Tiles.nameOf(p.seatWind);
     $id(`card-dealer-${i}`).classList.toggle('hidden', !GS().isDealer(G, i));
     $id(`card-riichi-${i}`).classList.toggle('hidden', !(p.isRiichi || p.riichiPending));
-    const startingDealerMark = $id(`card-starting-dealer-${i}`);
-    if (startingDealerMark) {
+    // (2) 起家マークはカード内ではなく卓上(#table-chicha-N)に表示する。
+    const tableChicha = $id(`table-chicha-${i}`);
+    if (tableChicha) {
       const isStartingDealer = Number.isInteger(G.startingDealerIndex) && G.startingDealerIndex === i;
-      startingDealerMark.classList.toggle('hidden', !isStartingDealer);
-      startingDealerMark.src = G.roundWind === C.SOUTH
+      tableChicha.classList.toggle('hidden', !isStartingDealer);
+      tableChicha.src = G.roundWind === C.SOUTH
         ? 'assets/ui/seat/chicha-south.png'
         : 'assets/ui/seat/chicha-east.png';
     }

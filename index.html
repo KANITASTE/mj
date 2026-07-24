@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/responsive.css?v=20260723-layout-match">
 <link rel="stylesheet" href="css/table-split.css?v=20260723-meld-fix">
-<link rel="stylesheet" href="css/table-overhead.css?v=20260724-shizi07">
+<link rel="stylesheet" href="css/table-overhead.css?v=20260724-batch2b">
 </head>
 <body>
 <div id="app">
@@ -133,6 +133,10 @@
           <input type="range" id="set-volume" min="0" max="100" value="60">
           <span id="set-volume-val">60</span>
         </div>
+        <div class="setting-row">
+          <span class="setting-label">打牌操作</span>
+          <button id="set-discard" class="toggle-btn">2クリック</button>
+        </div>
         <div class="setting-row danger-row">
           <span class="setting-label">セーブデータ</span>
           <button id="set-reset" class="toggle-btn danger">初期化</button>
@@ -187,6 +191,11 @@
 
         <!-- 卓中央 -->
         <div id="center-zone">
+        <!-- 起家マーク(卓上・起家の右側) -->
+        <img class="table-chicha hidden" id="table-chicha-0" src="assets/ui/seat/chicha-east.png" alt="起家">
+        <img class="table-chicha hidden" id="table-chicha-1" src="assets/ui/seat/chicha-east.png" alt="起家">
+        <img class="table-chicha hidden" id="table-chicha-2" src="assets/ui/seat/chicha-east.png" alt="起家">
+        <img class="table-chicha hidden" id="table-chicha-3" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="river river-top" id="river-2"></div>
           <div id="center-row">
             <div class="river river-left" id="river-3"></div>
@@ -255,7 +264,6 @@
         </div>
         <div class="info-card table-seat-card" id="card-3">
           <div class="seat-relation relation-upper">上家</div>
-          <img class="starting-dealer-mark hidden" id="card-starting-dealer-3" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-3"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-3">北</span><span class="card-name" id="card-name-3">左家</span><span class="dealer-mark hidden" id="card-dealer-3">親</span></div>
@@ -264,7 +272,6 @@
         </div>
         <div class="info-card table-seat-card" id="card-2">
           <div class="seat-relation relation-opposite">対面</div>
-          <img class="starting-dealer-mark hidden" id="card-starting-dealer-2" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-2"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-2">西</span><span class="card-name" id="card-name-2">対面</span><span class="dealer-mark hidden" id="card-dealer-2">親</span></div>
@@ -272,7 +279,6 @@
           </div>
         </div>
         <div class="info-card table-seat-card" id="card-0">
-          <img class="starting-dealer-mark hidden" id="card-starting-dealer-0" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-0"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-0">東</span><span class="card-name" id="card-name-0">あなた</span><span class="dealer-mark hidden" id="card-dealer-0">親</span></div>
@@ -281,7 +287,6 @@
         </div>
         <div class="info-card table-seat-card" id="card-1">
           <div class="seat-relation relation-lower">下家</div>
-          <img class="starting-dealer-mark hidden" id="card-starting-dealer-1" src="assets/ui/seat/chicha-east.png" alt="起家">
           <div class="card-face" id="card-face-1"></div>
           <div class="card-body">
             <div class="card-top"><span class="card-wind" id="card-wind-1">南</span><span class="card-name" id="card-name-1">右家</span><span class="dealer-mark hidden" id="card-dealer-1">親</span></div>
@@ -383,7 +388,14 @@
   </section>
 
   <!-- スマホ用案内 -->
-  <div id="mobile-block" class="hidden">
+  <div id="rotate-guide" aria-hidden="true">
+  <div class="rotate-guide-panel">
+    <div class="rotate-guide-icon" aria-hidden="true"></div>
+    <h2>端末を横向きにしてください</h2>
+    <p>この夜の卓は横長の画面専用です。<br>タブレット・スマートフォンを横向きにしてプレイしてください。</p>
+  </div>
+</div>
+<div id="mobile-block" class="hidden">
     <p>本ゲームはPCまたは横向きのタブレットでお楽しみください。</p>
   </div>
 
@@ -432,19 +444,19 @@
 <script src="js/cpu/cpu-offense.js"></script>
 <script src="js/cpu/cpu-balance.js"></script>
 <script src="js/cpu/cpu-defense.js"></script>
-<script src="js/audio/audio.js?v=20260722-4"></script>
-<script src="js/storage/storage.js?v=20260723-avatar11"></script>
+<script src="js/audio/audio.js?v=20260724-gamebgm"></script>
+<script src="js/storage/storage.js?v=20260724-discard"></script>
 <script src="js/ui/dialogue.js?v=20260722-2"></script>
 <script src="js/ui/animation.js?v=20260722-stage1"></script>
 <script src="js/ui/character-ui.js?v=20260723-shizi02"></script>
-<script src="js/ui/render.js?v=20260723-meld-fix"></script>
+<script src="js/ui/render.js?v=20260724-batch2"></script>
 <script src="js/ui/result-ui.js"></script>
 <script src="js/ui/dev-panel.js?v=20260721-2"></script>
-<script src="js/game/game-state.js?v=20260723-starting-dealer"></script>
-<script src="js/game/round-manager.js?v=20260723-starting-dealer"></script>
-<script src="js/game/turn-manager.js?v=20260721-2"></script>
+<script src="js/game/game-state.js?v=20260724-batch2"></script>
+<script src="js/game/round-manager.js?v=20260724-batch2"></script>
+<script src="js/game/turn-manager.js?v=20260724-oneclick"></script>
 <script src="js/game/call-manager.js"></script>
 <script src="js/game/result-manager.js?v=20260721-2"></script>
-<script src="js/main.js?v=20260722-layout-fix"></script>
+<script src="js/main.js?v=20260724-batch2"></script>
 </body>
 </html>

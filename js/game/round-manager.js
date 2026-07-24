@@ -41,6 +41,8 @@ window.YM = window.YM || {};
     YM.timers.clearAll();
     YM.Animation.clear();
     Round.resetTransientView();
+    // (9) 対局用BGM(添付曲をランダム再生・クロスフェード)を開始
+    if (YM.Audio && YM.Audio.playGameBgm) YM.Audio.playGameBgm();
     const requestedIds = selectedCharacterIds != null
       ? selectedCharacterIds
       : (Game.G && Game.G.selectedCharacterIds) ||
@@ -313,6 +315,9 @@ window.YM = window.YM || {};
   Round.advance = function (opts) {
     const G = Game.G;
     YM.timers.clearAll();
+
+    // (8) 1局終わるごとに加算。0の間は順位を出さない。
+    G.roundsCompleted = (G.roundsCompleted || 0) + 1;
 
     // 飛び判定
     if (G.players.some(p => p.score < 0)) {

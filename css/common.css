@@ -196,3 +196,87 @@ body {
   line-height: 2.2;
   color: var(--ivory);
 }
+
+/* =====================================================================
+ * 2026-07-24 追加分
+ * ================================================================== */
+
+/* --- (5) タブレット実機対策: ブラウザのツールバーを除いた
+ * 「見えている高さ」(dvh) を基準にする。100vh はツールバー格納時の
+ * 高さを指すため、下端のボタンが切れていた。 --- */
+@supports (height: 100dvh) {
+  body { height: 100dvh; }
+  #app { height: 100dvh; }
+  #game-frame {
+    width: min(100vw, calc(100dvh * 16 / 9), 1600px);
+    height: min(100dvh, calc(100vw * 9 / 16), 900px);
+  }
+  :root {
+    --frame-w: min(100vw, calc(100dvh * 16 / 9), 1600px);
+    --frame-h: min(100dvh, calc(100vw * 9 / 16), 900px);
+  }
+}
+
+/* --- (4) 縦向き端末への案内オーバーレイ --- */
+#rotate-guide {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: rgba(5, 4, 3, .96);
+  color: #f2d7a0;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#rotate-guide .rotate-guide-panel {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+}
+
+#rotate-guide .rotate-guide-icon {
+  width: 84px;
+  height: 84px;
+  border: 3px solid #d9a04e;
+  border-radius: 12px;
+  position: relative;
+  animation: ym-rotate-hint 2.2s ease-in-out infinite;
+}
+
+#rotate-guide .rotate-guide-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: #d9a04e;
+}
+
+@keyframes ym-rotate-hint {
+  0%, 18%   { transform: rotate(0deg); }
+  55%, 82%  { transform: rotate(90deg); }
+  100%      { transform: rotate(90deg); }
+}
+
+#rotate-guide h2 {
+  font: 700 20px/1.5 var(--serif-jp, serif);
+  letter-spacing: .08em;
+}
+
+#rotate-guide p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #d9c3a3;
+}
+
+@media (orientation: portrait) {
+  #rotate-guide { display: flex; }
+}
