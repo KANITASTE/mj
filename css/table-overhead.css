@@ -63,9 +63,14 @@
   --player-tile-height: calc(var(--player-tile-width) * 1.37);
 
   /* 対面の裏牌(大)と左右の側面牌(細)。 */
-  /* 13枚 + 隙間が卓幅に収まる上限いっぱいまで大きくする(見本準拠)。 */
+  /* 13枚 + 隙間が卓幅に収まる上限いっぱいまで大きくする(見本準拠)。
+   * 対面の牌は「上から見た牌」なので平たい(幅 x 奥行き ≒ 1 : 0.72)。 */
   --ovh-back-w: calc(var(--ovh-table) * .072);
-  --ovh-back-h: calc(var(--ovh-back-w) * 1.32);
+  --ovh-back-h: calc(var(--ovh-back-w) * .72);
+
+  /* 手牌レール(各家)。左端(本人視点)固定・右から詰めるための固定寸法。 */
+  --ovh-hand2-w: calc(var(--ovh-back-w) * 13 + 12px);
+  --ovh-side-rail: calc(var(--ovh-slab-h) * 13 + 12px);
   --ovh-slab-w: calc(var(--ovh-table) * .033);
   --ovh-slab-h: calc(var(--ovh-table) * .046);
 
@@ -311,6 +316,12 @@
   z-index: 3;
   display: grid;
   gap: 0;
+}
+
+/* セル内の牌は余白なし(隙間を詰める)。 */
+#center-zone .river .tile { margin: 0; }
+
+.river {
   place-items: center;
   margin: 0;
   min-width: 0;
@@ -337,8 +348,8 @@
   margin: 0;
   width: 100%;
   height: 100%;
-  grid-template-columns: repeat(6, var(--river-tile-width));
-  grid-template-rows: repeat(3, var(--river-tile-height));
+  grid-template-columns: repeat(6, calc(var(--river-tile-width) - 2px));
+  grid-template-rows: repeat(3, calc(var(--river-tile-height) - 2px));
   grid-auto-flow: row;
   align-content: end;
   justify-content: center;
@@ -346,10 +357,10 @@
   transform: none;
 }
 
-/* 1段目(最初の6枚)が最下段=自分側。 */
-#player-river-lane .river-bottom .tile:nth-child(-n+6)                 { grid-row: 3; }
+/* 1段目(最初の6枚)が最上段=中央側。段は手前(自分側)へ増える。 */
+#player-river-lane .river-bottom .tile:nth-child(-n+6)                 { grid-row: 1; }
 #player-river-lane .river-bottom .tile:nth-child(n+7):nth-child(-n+12) { grid-row: 2; }
-#player-river-lane .river-bottom .tile:nth-child(n+13)                 { grid-row: 1; }
+#player-river-lane .river-bottom .tile:nth-child(n+13)                 { grid-row: 3; }
 
 /* --- 対面: 手牌のすぐ下。1段目が上(対面側)、段は下(中央)へ。 --- */
 .river-top {
@@ -361,14 +372,19 @@
   width: var(--ovh-river-long);
   height: var(--ovh-river-short);
   display: grid;
-  grid-template-columns: repeat(6, var(--river-tile-width));
-  grid-template-rows: repeat(3, var(--river-tile-height));
+  grid-template-columns: repeat(6, calc(var(--river-tile-width) - 2px));
+  grid-template-rows: repeat(3, calc(var(--river-tile-height) - 2px));
   grid-auto-flow: row;
   align-content: start;
   justify-content: center;
   flex-wrap: nowrap;
   direction: rtl;
 }
+
+/* 対面も1段目が最下段=中央側。段は対面側(上)へ増える。 */
+.river-top .tile:nth-child(-n+6)                 { grid-row: 3; }
+.river-top .tile:nth-child(n+7):nth-child(-n+12) { grid-row: 2; }
+.river-top .tile:nth-child(n+13)                 { grid-row: 1; }
 
 /* --- 上家: 卓の左辺寄りの縦列。やや下へオフセット(風車)。
  * 1列目が左(上家側)、列は右(中央)へ。本人視点の左→右 = 画面の上→下。 --- */
@@ -380,17 +396,18 @@
   transform: none;
   width: var(--ovh-river-short);
   height: var(--ovh-river-long);
-  grid-template-columns: repeat(3, var(--river-tile-height));
-  grid-template-rows: repeat(6, var(--river-tile-width));
+  grid-template-columns: repeat(3, calc(var(--river-tile-height) - 2px));
+  grid-template-rows: repeat(6, calc(var(--river-tile-width) - 2px));
   grid-auto-flow: column;
   align-content: start;
   justify-content: start;
   direction: ltr;
 }
 
-.river-left .tile:nth-child(-n+6)                 { grid-column: 1; }
+/* 1列目が最右列=中央側。列は上家側(左)へ増える。 */
+.river-left .tile:nth-child(-n+6)                 { grid-column: 3; }
 .river-left .tile:nth-child(n+7):nth-child(-n+12) { grid-column: 2; }
-.river-left .tile:nth-child(n+13)                 { grid-column: 3; }
+.river-left .tile:nth-child(n+13)                 { grid-column: 1; }
 
 /* --- 下家: 卓の右辺寄りの縦列。やや上へオフセット(風車)。
  * 1列目が右(下家側)、列は左(中央)へ。本人視点の左→右 = 画面の下→上。 --- */
@@ -402,8 +419,8 @@
   transform: none;
   width: var(--ovh-river-short);
   height: var(--ovh-river-long);
-  grid-template-columns: repeat(3, var(--river-tile-height));
-  grid-template-rows: repeat(6, var(--river-tile-width));
+  grid-template-columns: repeat(3, calc(var(--river-tile-height) - 2px));
+  grid-template-rows: repeat(6, calc(var(--river-tile-width) - 2px));
   grid-auto-flow: column;
   align-content: start;
   justify-content: end;
@@ -416,9 +433,10 @@
 .river-right .tile:nth-child(6n+4) { grid-row: 3; }
 .river-right .tile:nth-child(6n+5) { grid-row: 2; }
 .river-right .tile:nth-child(6n+6) { grid-row: 1; }
-.river-right .tile:nth-child(-n+6)                 { grid-column: 3; }
+/* 1列目が最左列=中央側。列は下家側(右)へ増える。 */
+.river-right .tile:nth-child(-n+6)                 { grid-column: 1; }
 .river-right .tile:nth-child(n+7):nth-child(-n+12) { grid-column: 2; }
-.river-right .tile:nth-child(n+13)                 { grid-column: 1; }
+.river-right .tile:nth-child(n+13)                 { grid-column: 3; }
 
 
 /* ---------------------------------------------------------------------
@@ -429,10 +447,18 @@
  *   下家 : 卓の右余白・上寄り(縦)
  * 牌の回転・鳴き牌(横倒し)は table-split.css の規則をそのまま使う。
  * ------------------------------------------------------------------ */
+.table-meld:empty { display: none; }
+
+/* (3) 鳴かれた牌の黄色い枠は使わない。 */
+.table-meld .tile.called-tile {
+  outline: none;
+  outline-offset: 0;
+}
+
 .table-meld {
   --meld-tile-width: calc(var(--river-tile-width) * .92);
   --meld-tile-height: calc(var(--river-tile-height) * .92);
-  --meld-face-overlap: calc(var(--meld-tile-width) * .07);
+  --meld-face-overlap: calc(var(--meld-tile-width) * .11);
   position: absolute;
   z-index: 5;
   gap: calc(var(--ovh-table) * .010);
@@ -463,33 +489,33 @@
   align-items: flex-end;
 }
 
-/* --- 対面: 手牌の下、上の河のすぐ左。右端を河の左縁に固定し、
- * 副露が増えたら左(卓の左余白)へ伸びる。河とは構造的に重ならない。 --- */
+/* --- 対面: 本人視点の右隣り = 画面の左。手牌と同じ上辺の帯の左端。
+ * 手牌は本人視点の左(画面右)固定で右から詰まるため、副露が増えるほど
+ * 手牌の左端が右へ退き、副露と重ならない(4副露まで検証)。 --- */
 .meld-top {
-  left: auto;
-  right: calc(50% - var(--ovh-top-shift)
-              + var(--river-tile-width) * 3
-              + clamp(10px, 1vw, 18px));
-  top: calc(var(--ovh-back-h) + clamp(8px, 1.2vh, 16px));
-  bottom: auto;
-  transform: none;
-}
-
-/* --- 下家: 卓の右余白・上寄り(側面手牌の内側)。 --- */
-.meld-right {
-  left: calc(100% + clamp(8px, 1vw, 18px));
+  left: calc(-1 * var(--ovh-margin-x) + clamp(6px, .8vw, 14px));
   right: auto;
-  top: calc(var(--ovh-back-h) + clamp(10px, 1.6vh, 20px));
+  top: clamp(2px, .5vh, 8px);
+  bottom: auto;
+  transform: none;
+  align-items: flex-start;
+}
+
+/* --- 下家: 本人視点の右隣り = 画面の上。右余白の上端(側面手牌の内側)。 --- */
+.meld-right {
+  left: auto;
+  right: calc(-1 * var(--ovh-margin-x) + var(--ovh-slab-w) + clamp(16px, 1.6vw, 26px));
+  top: clamp(2px, .5vh, 8px);
   bottom: auto;
   transform: none;
 }
 
-/* --- 上家: 卓の左余白・下寄り(側面手牌の内側)。 --- */
+/* --- 上家: 本人視点の右隣り = 画面の下。左余白の下端(側面手牌の内側)。 --- */
 .meld-left {
-  left: auto;
-  right: calc(100% + clamp(8px, 1vw, 18px));
+  left: calc(-1 * var(--ovh-margin-x) + var(--ovh-slab-w) + clamp(16px, 1.6vw, 26px));
+  right: auto;
   top: auto;
-  bottom: clamp(8px, 1.2vh, 16px);
+  bottom: clamp(2px, .5vh, 8px);
   transform: none;
 }
 
@@ -506,25 +532,43 @@
 #hand-2 {
   position: absolute;
   z-index: 4;
-  left: 50%;
+  left: auto;
+  right: calc(50% - var(--ovh-hand2-w) / 2);
   top: calc(var(--ovh-lane-top) + clamp(2px, .5vh, 6px));
-  transform: translateX(-50%);
+  transform: none;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 2px;
+  gap: 1px;
   margin: 0;
   width: max-content;
   height: max-content;
-  justify-content: center;
+  justify-content: flex-end;
   pointer-events: none;
 }
 
-/* 対面の裏牌は大きく。 */
-#hand-2 .tile {
+/* (5)(6) 対面の牌は「上から見た牌」。
+ * 白い面(象牙)が厚く、奥側(上端)に竹の層が薄く見える。
+ * tiles.css の竹目背景・模様は使わない。 */
+#hand-2 .tile,
+#hand-2 .tile.back,
+#hand-2 .tile.cpu {
   width: var(--ovh-back-w);
   height: var(--ovh-back-h);
+  /* サンプル実測: 象牙 #ece3ca(ほぼ平坦) / 竹層 #cb9c4f(外縁 #d6ab61) /
+   * 輪郭 #7d6a3a / 竹層は奥行きの約29%。 */
+  background: linear-gradient(180deg, #efe6cf 0%, #ece3ca 55%, #e6dcc1 100%);
+  border: 1px solid #7d6a3a;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 calc(var(--ovh-back-h) * .10) 0 0 #d6ab61,
+    inset 0 calc(var(--ovh-back-h) * .29) 0 0 #cb9c4f,
+    0 2px 3px rgba(0, 0, 0, .45);
 }
+
+#hand-2 .tile::before,
+#hand-2 .tile::after { content: none; box-shadow: none; }
+#hand-2 .tile svg, #hand-2 .tile img { display: none; }
 
 /* 上家: 左ペインの左端(#area-left の親は #area-mid = ペイン幅)。 */
 #area-left {
@@ -532,10 +576,10 @@
   z-index: 4;
   left: clamp(6px, .8vw, 14px);
   right: auto;
-  top: calc(var(--ovh-lane-top) + var(--ovh-table) / 2);
-  transform: translateY(-50%);
+  top: calc(var(--ovh-lane-top) + (var(--ovh-table) - var(--ovh-side-rail)) / 2);
+  transform: none;
   width: max-content;
-  height: max-content;
+  height: var(--ovh-side-rail);
 }
 
 /* 下家: 左ペインの右端。 */
@@ -544,30 +588,67 @@
   z-index: 4;
   left: auto;
   right: clamp(6px, .8vw, 14px);
-  top: calc(var(--ovh-lane-top) + var(--ovh-table) / 2);
-  transform: translateY(-50%);
+  top: calc(var(--ovh-lane-top) + (var(--ovh-table) - var(--ovh-side-rail)) / 2);
+  transform: none;
   width: max-content;
-  height: max-content;
+  height: var(--ovh-side-rail);
 }
 
 /* 側面牌(細い横倒し)。table-split の flex:1 / center を打ち消す。 */
 .hand-col {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   flex: 0 0 auto;
   align-items: center;
-  justify-content: flex-start;
   width: max-content;
-  height: max-content;
+  height: 100%;
   min-height: 0;
 }
 
+/* 上家: 本人視点の左 = 画面上端に固定。鳴くと下(本人視点の右)から減る。 */
+#area-left .hand-col { justify-content: flex-start; }
+
+/* 下家: 本人視点の左 = 画面下端に固定。鳴くと上(本人視点の右)から減る。 */
+#area-right .hand-col { justify-content: flex-end; }
+
+/* (6) 側面の牌(上家・下家)も「竹は薄く・白は厚く」。
+ * 竹の層は本人側(外側)の縦の縁: 上家=左端 / 下家=右端。
+ * tiles.css .vback の border-right 4px(厚い面) は使わない。 */
 #hand-1 .tile,
-#hand-3 .tile {
+#hand-3 .tile,
+#hand-1 .tile.vback,
+#hand-3 .tile.vback {
   width: var(--ovh-slab-w);
   height: var(--ovh-slab-h);
+  background: #ece3ca;
+  border: 1px solid #7d6a3a;
+  border-right-width: 1px;
+  border-radius: 2.5px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .45);
 }
+
+/* 上家: 竹層は本人側 = 左端。外縁に明るいライン。 */
+#hand-3 .tile,
+#hand-3 .tile.vback {
+  box-shadow:
+    inset calc(var(--ovh-slab-w) * .10) 0 0 0 #d6ab61,
+    inset calc(var(--ovh-slab-w) * .29) 0 0 0 #cb9c4f,
+    0 2px 3px rgba(0, 0, 0, .45);
+}
+
+/* 下家: 竹層は本人側 = 右端。 */
+#hand-1 .tile,
+#hand-1 .tile.vback {
+  box-shadow:
+    inset calc(var(--ovh-slab-w) * -.10) 0 0 0 #d6ab61,
+    inset calc(var(--ovh-slab-w) * -.29) 0 0 0 #cb9c4f,
+    0 2px 3px rgba(0, 0, 0, .45);
+}
+
+#hand-1 .tile::before, #hand-1 .tile::after,
+#hand-3 .tile::before, #hand-3 .tile::after { content: none; box-shadow: none; }
+#hand-1 .tile svg, #hand-3 .tile svg { display: none; }
 
 
 /* ---------------------------------------------------------------------
@@ -580,11 +661,6 @@
   align-items: end;
   justify-items: center;
   gap: 2px;
-}
-
-/* レールを左寄せ(見本準拠)。 */
-#player-hand-wrap {
-  margin-inline: clamp(10px, 1.6vw, 30px) auto;
 }
 
 #action-bar {
@@ -601,6 +677,23 @@
 #btn-ron {
   width: clamp(60px, 5.2vw, 90px);
   height: clamp(38px, 4.7vh, 52px);
+}
+
+
+/* ---------------------------------------------------------------------
+ * 7.5 対局画面中の室内ビネット調整
+ *
+ * common.css の #crt-overlay(z-index:900)は画面の縁を暗くする
+ * 「室内の空気感」演出。俯瞰レイアウトでは各家の手牌が画面の縁に
+ * 寄るため、この演出が牌に強くかかり、サンプルどおりの色
+ * (象牙 #ece3ca / 竹 #cb9c4f)が縁で2〜3割暗く見えてしまう。
+ * 対局画面が表示されている間だけ減光を弱める(完全には消さない)。
+ * common.css 自体は変更しない。
+ * ------------------------------------------------------------------ */
+body:has(#screen-game.active) #crt-overlay {
+  background: radial-gradient(ellipse 95% 88% at 50% 42%,
+    transparent 68%, rgba(4, 3, 2, .30) 100%);
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, .26);
 }
 
 
