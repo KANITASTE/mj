@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Cinzel:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/reset.css">
 <link rel="stylesheet" href="css/common.css">
-<link rel="stylesheet" href="css/title.css">
+<link rel="stylesheet" href="css/title.css?v=20260724-credit">
 <link rel="stylesheet" href="css/game-start.css?v=20260723-layout-match">
 <link rel="stylesheet" href="css/table.css?v=20260723-shizi03">
 <link rel="stylesheet" href="css/tiles.css?v=20260722-stage1">
@@ -161,14 +161,30 @@
 
   <!-- ===== クレジット ===== -->
   <section id="screen-credit" class="screen sub-screen">
-    <div class="sub-panel">
-      <h2 class="sub-title">CREDIT</h2>
+    <div class="sub-panel credit-panel">
+      <div class="credit-head">
+        <span class="credit-kicker">YOIMACHI MAHJONG CLUB</span>
+        <h2 class="sub-title credit-title">CREDIT</h2>
+        <span class="credit-rule" aria-hidden="true"></span>
+      </div>
+
       <div class="credit-body">
-        <p>宵待ち麻雀倶楽部 Ver.2 (四人打ち・試作版)</p>
-        <p>企画・開発:あなた</p>
-        <p>プログラム協力:Claude Code</p>
+        <p class="credit-work">宵待ち麻雀倶楽部 Ver.2<span class="credit-work-note">四人打ち・試作版</span></p>
+
+        <dl class="credit-list">
+          <div class="credit-row">
+            <dt>企画・開発</dt>
+            <dd>
+              <a class="credit-link" href="https://kanitaste.github.io/rupa/" target="_blank" rel="noopener noreferrer">
+                RUPA<span class="credit-link-mark" aria-hidden="true"></span>
+              </a>
+            </dd>
+          </div>
+        </dl>
+
         <p class="credit-small">本作はフィクションです。登場する人物・団体は実在のものと関係ありません。<br>登場人物は全員20歳以上です。</p>
       </div>
+
       <button class="menu-btn back-btn" data-back>もどる</button>
     </div>
   </section>
