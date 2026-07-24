@@ -52,6 +52,13 @@ window.YM = window.YM || {};
       row.innerHTML = `<span>ドラ</span><span>${opts.doraCount}翻</span>`;
       listEl.appendChild(row);
     }
+    if (opts.uraCount > 0) {
+      const row = document.createElement('div');
+      row.className = 'yaku-row';
+      row.style.animationDelay = (0.3 + (opts.yakuList || []).length * 0.25) + 's';
+      row.innerHTML = `<span>裏ドラ</span><span>${opts.uraCount}翻</span>`;
+      listEl.appendChild(row);
+    }
 
     // 点数表示
     const rankTag = opts.rank ? `<span class="score-rank">${opts.rank}</span>` : '';
@@ -61,12 +68,88 @@ window.YM = window.YM || {};
     // 4人の点数変動
     renderDeltas($id('result-deltas'), opts.deltas);
 
+    // はじめてシリーズのバッジ / カメラ保存ボタン
+    renderNewRecords(opts.newFirsts);
+    setupAlbumButton(opts.albumEntry);
+
     $id('result-next').onclick = () => {
       ov.classList.add('hidden');
       if (opts.onNext) opts.onNext();
     };
     ov.classList.remove('hidden');
   };
+
+  /* ===== NEW RECORD(はじめてシリーズ)のバッジ =====
+   * 和了結果画面内の小さな帯として表示する。同時達成はすべて並べる。 */
+  function renderNewRecords(ids) {
+    const el = $id('result-records');
+    if (!el) return;
+    el.innerHTML = '';
+    if (!ids || !ids.length) { el.classList.add('hidden'); return; }
+    const label = document.createElement('span');
+    label.className = 'record-label';
+    label.textContent = 'NEW RECORD';
+    el.appendChild(label);
+    ids.forEach(id => {
+      const b = document.createElement('span');
+      b.className = 'record-badge';
+      b.textContent = YM.Storage.firstLabel(id);
+      el.appendChild(b);
+    });
+    el.classList.remove('hidden');
+  }
+
+  /* ===== カメラ(アルバム保存)ボタン =====
+   * プレイヤー本人の和了のみ表示。CPU の和了では非表示。 */
+  function setupAlbumButton(entry) {
+    const btn = $id('result-album-btn');
+    const toast = $id('result-toast');
+    if (!btn) return;
+    if (toast) { toast.classList.add('hidden'); toast.textContent = ''; }
+
+    if (!entry) { btn.classList.add('hidden'); return; }
+    btn.classList.remove('hidden');
+
+    const alreadySaved = YM.Storage.albumHas(entry.id);
+    setAlbumButtonState(btn, alreadySaved ? 'saved' : 'idle');
+
+    btn.onclick = () => {
+      if (btn.dataset.state === 'saved') return;   // 二重保存させない
+      const res = YM.Storage.albumAdd(entry);
+      if (res.ok) {
+        YM.Audio.se('select');
+        setAlbumButtonState(btn, 'saved');
+        showToast('和了アルバムに保存しました');
+      } else if (res.reason === 'duplicate') {
+        setAlbumButtonState(btn, 'saved');
+        showToast('この和了は保存済みです');
+      } else if (res.reason === 'full') {
+        showToast('和了アルバムがいっぱいです。不要な記録を削除してから保存してください', true);
+      } else {
+        showToast('記録を保存できませんでした。ブラウザの保存容量を確認してください', true);
+      }
+    };
+  }
+
+  function setAlbumButtonState(btn, state) {
+    btn.dataset.state = state;
+    const saved = state === 'saved';
+    btn.classList.toggle('is-saved', saved);
+    btn.disabled = saved;
+    btn.setAttribute('aria-label', saved ? 'この和了は保存済みです' : 'この和了を和了アルバムに保存');
+    const text = btn.querySelector('.album-btn-text');
+    if (text) text.textContent = saved ? '保存済み' : 'ALBUM';
+  }
+
+  function showToast(message, isError) {
+    const toast = $id('result-toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.toggle('is-error', !!isError);
+    toast.classList.remove('hidden');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.add('hidden'), 2600);
+  }
 
   /* ===== 流局結果 ===== */
   R.showRyuukyoku = function (opts) {
@@ -85,6 +168,9 @@ window.YM = window.YM || {};
     });
     $id('result-score').textContent = 'ノーテン罰符';
     renderDeltas($id('result-deltas'), opts.deltas);
+    // 流局ではアルバム保存も NEW RECORD も出さない
+    renderNewRecords(null);
+    setupAlbumButton(null);
     $id('result-next').onclick = () => {
       ov.classList.add('hidden');
       if (opts.onNext) opts.onNext();

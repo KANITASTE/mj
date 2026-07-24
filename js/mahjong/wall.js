@@ -84,5 +84,24 @@ window.YM = window.YM || {};
     return wall.doraIndicators.map(t => YM.Tiles.doraFromIndicator(t.kind));
   };
 
+  /* 裏ドラ表示牌。
+   * 王牌ではドラ表示牌のすぐ下(内側)の段が裏ドラ表示牌にあたる。
+   * この実装では dead を1列とみなしているため、表向きの表示牌が
+   * 末尾から順に使われるのに対し、その1つ内側の牌を裏として対応づける。
+   * めくったドラ表示牌と同じ枚数(槓ドラぶんも含む)を返す。 */
+  W.uraDoraIndicators = function (wall) {
+    const out = [];
+    for (let i = 0; i < wall.doraIndicators.length; i++) {
+      const idx = wall.dead.length - 1 - YM.CONST.MAX_DORA_INDICATORS - i;
+      if (idx < 0) break;
+      out.push(wall.dead[idx]);
+    }
+    return out;
+  };
+
+  W.uraDoraKinds = function (wall) {
+    return W.uraDoraIndicators(wall).map(t => YM.Tiles.doraFromIndicator(t.kind));
+  };
+
   YM.Wall = W;
 })();

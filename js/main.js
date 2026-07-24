@@ -2,7 +2,9 @@
 window.YM = window.YM || {};
 
 /* 完成時は false にするとDEVボタンが消える */
-const DEBUG_MODE = true;
+/* 公開版では false。開発用のDEVボタン・パネルを通常画面から見えなくする。
+ * 開発時に使う場合のみ true に戻す(コードは残してある)。 */
+const DEBUG_MODE = false;
 
 (function () {
   const $id = id => document.getElementById(id);
@@ -122,19 +124,141 @@ const DEBUG_MODE = true;
     if (stage) stage.classList.remove('volume-touched');
   }
 
-  function resetSaveData() {
-    if (!confirm('名前、アイコン、対戦成績、解放イベント、選択メンバー、設定をすべて初期化します。よろしいですか？')) return;
-    St().reset();
-    St().save();
+  /* ===== データ管理(バックアップ / 初期化) ===== */
+
+  function showDataMessage(msg, isError) {
+    const el = $id('data-message');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.classList.toggle('is-error', !!isError);
+    el.classList.toggle('hidden', !msg);
+    clearTimeout(showDataMessage._t);
+    if (msg) showDataMessage._t = setTimeout(() => el.classList.add('hidden'), 4200);
+  }
+
+  /* 保存データを JSON ファイルとして書き出す */
+  function exportBackup() {
+    try {
+      const json = St().exportData();
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = St().backupFileName();
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showDataMessage('バックアップを書き出しました');
+      return true;
+    } catch (e) {
+      showDataMessage('バックアップを書き出せませんでした', true);
+      return false;
+    }
+  }
+
+  /* 初期化・読み込みの共通確認ダイアログ */
+  function openDataConfirm(opts) {
+    const box = $id('data-confirm');
+    if (!box) return;
+    $id('data-confirm-title').textContent = opts.title || '';
+    $id('data-confirm-text').textContent = opts.text || '';
+    const warn = $id('data-confirm-warn');
+    warn.textContent = opts.warn || '';
+    warn.classList.toggle('hidden', !opts.warn);
+    $id('data-confirm-backup-note').classList.toggle('hidden', !opts.showBackup);
+    $id('data-confirm-export').classList.toggle('hidden', !opts.showBackup);
+    $id('data-confirm-yes').textContent = opts.okLabel || '削除する';
+    $id('data-confirm-yes').onclick = () => {
+      closeDataConfirm();
+      if (opts.onOk) opts.onOk();
+    };
+    box.classList.remove('hidden');
+  }
+
+  function closeDataConfirm() {
+    const box = $id('data-confirm');
+    if (box) box.classList.add('hidden');
+  }
+
+  /* 初期化後に画面を安全に作り直す */
+  function refreshAfterDataChange() {
     if (YM.Round && YM.Round.resetTransientView) YM.Round.resetTransientView();
     applyAudioSettings();
     resetPrepInteractionState();
     refreshSettingsUI();
     refreshProfileUI();
-    characterSelection = YM.CharacterUI.buildCharacterSelect([]);
+    characterSelection = YM.CharacterUI.buildCharacterSelect(St().data.selectedCharacters || []);
     updatePrepReady();
     refreshContinue();
-    alert('初期化しました。');
+  }
+
+  function resetScope(scope) {
+    const ok = St().resetScope(scope);
+    refreshAfterDataChange();
+    showDataMessage(ok ? '初期化しました' :
+      '記録を保存できませんでした。ブラウザの保存容量を確認してください', !ok);
+  }
+
+  /* 設定のみ初期化 */
+  function askResetSettings() {
+    openDataConfirm({
+      title: '設定のみ初期化',
+      text: 'プレイヤー名、アバター、対戦相手の選択、音量などの設定を初期化します。戦績・はじめて記録・和了アルバムは残ります。',
+      okLabel: '初期化する',
+      onOk: () => resetScope('settings')
+    });
+  }
+
+  /* 記録のみ初期化 */
+  function askResetRecords() {
+    openDataConfirm({
+      title: '記録のみ初期化',
+      text: '対局回数、順位、戦績を初期化します。プレイヤー名・アバター・音量などの設定は残ります。',
+      warn: '和了アルバムとはじめて記録も削除されます。この操作は元に戻せません。',
+      showBackup: true,
+      onOk: () => resetScope('records')
+    });
+  }
+
+  /* すべて初期化 */
+  function resetSaveData() {
+    openDataConfirm({
+      title: 'すべてのデータを初期化',
+      text: '設定・戦績・はじめて記録・和了アルバムを含む、すべての保存データを削除して初回起動時の状態に戻します。',
+      warn: '和了アルバムとはじめて記録も削除されます。この操作は元に戻せません。',
+      showBackup: true,
+      onOk: () => resetScope('all')
+    });
+  }
+
+  /* バックアップ読み込み */
+  function importBackupFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      openDataConfirm({
+        title: 'バックアップを読み込む',
+        text: 'バックアップデータを読み込むと、現在の記録と設定が上書きされます。よろしいですか？',
+        okLabel: '読み込む',
+        onOk: () => {
+          const res = St().importData(text);
+          if (res.ok) {
+            refreshAfterDataChange();
+            showDataMessage('バックアップを読み込みました');
+          } else if (res.reason === 'format') {
+            showDataMessage('このファイルは宵待ち麻雀倶楽部のバックアップデータではありません', true);
+          } else if (res.reason === 'storage') {
+            showDataMessage('記録を保存できませんでした。ブラウザの保存容量を確認してください', true);
+          } else {
+            showDataMessage('バックアップファイルを読み込めませんでした', true);
+          }
+        }
+      });
+    };
+    reader.onerror = () => showDataMessage('バックアップファイルを読み込めませんでした', true);
+    reader.readAsText(file);
   }
 
   function wirePrepScreen() {
@@ -250,6 +374,17 @@ const DEBUG_MODE = true;
       });
     }
     $id('set-reset').addEventListener('click', resetSaveData);
+    $id('set-reset-settings').addEventListener('click', () => { AU().se('select'); askResetSettings(); });
+    $id('set-reset-records').addEventListener('click', () => { AU().se('select'); askResetRecords(); });
+    $id('set-export').addEventListener('click', () => { AU().se('select'); exportBackup(); });
+    $id('set-import').addEventListener('click', () => { AU().se('select'); $id('set-import-file').click(); });
+    $id('set-import-file').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      importBackupFile(file);
+    });
+    $id('data-confirm-no').addEventListener('click', () => { AU().se('select'); closeDataConfirm(); });
+    $id('data-confirm-export').addEventListener('click', () => { AU().se('select'); exportBackup(); });
   }
 
   /* ===== スマホ判定 ===== */
@@ -285,7 +420,7 @@ const DEBUG_MODE = true;
     });
     $id('btn-gallery').addEventListener('click', () => {
       AU().unlock(); AU().se('select');
-      YM.CharacterUI.buildGallery();
+      YM.AlbumUI.open();
       UI().showScreen('gallery');
     });
     $id('btn-credit').addEventListener('click', () => { AU().unlock(); AU().se('select'); UI().showScreen('credit'); });
@@ -302,8 +437,19 @@ const DEBUG_MODE = true;
       });
     });
 
-    $id('gallery-viewer-close').addEventListener('click', () => {
-      $id('gallery-viewer').classList.add('hidden');
+    // 和了アルバム
+    $id('album-back-list').addEventListener('click', () => {
+      AU().se('select'); YM.AlbumUI.backToList();
+    });
+    $id('album-delete').addEventListener('click', () => {
+      AU().se('select'); YM.AlbumUI.askDelete();
+    });
+    $id('album-delete-no').addEventListener('click', () => {
+      AU().se('select'); YM.AlbumUI.cancelDelete();
+    });
+    $id('album-delete-yes').addEventListener('click', () => YM.AlbumUI.confirmDelete());
+    $id('album-export-png').addEventListener('click', () => {
+      AU().se('select'); YM.AlbumUI.exportPng();
     });
 
     // 対局中の操作ボタン
@@ -386,6 +532,8 @@ const DEBUG_MODE = true;
     // DEVパネル
     if (!DEBUG_MODE) {
       $id('dev-toggle').style.display = 'none';
+      const devPanel = $id('dev-panel');
+      if (devPanel) devPanel.classList.add('hidden');
     } else {
       YM.Dev.wire();
     }

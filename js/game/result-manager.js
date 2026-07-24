@@ -23,6 +23,38 @@ window.YM = window.YM || {};
     const isDealer = GS().isDealer(g, winnerIdx);
     const S = YM.Scoring;
 
+    /* --- 裏ドラ ---
+     * リーチをかけて和了した場合のみ、王牌の裏ドラ表示牌をめくる。
+     * 役満のときは加算しない(既存のドラの扱いに合わせる)。 */
+    let uraIndicators = [];
+    let uraCount = 0;
+    if (p.isRiichi && !res.yakuman && g.wall) {
+      try {
+        uraIndicators = YM.Wall.uraDoraIndicators(g.wall).map(t => t.kind);
+        const uraKinds = YM.Wall.uraDoraKinds(g.wall);
+        const counts = {};
+        p.hand.forEach(t => { counts[t.kind] = (counts[t.kind] || 0) + 1; });
+        (p.melds || []).forEach(m => (m.tiles || []).forEach(t => {
+          counts[t.kind] = (counts[t.kind] || 0) + 1;
+        }));
+        /* 和了牌は p.hand に含まれない(ロンは相手の捨て牌、ツモは drawnTile)
+         * ため、ここで1枚加える。 */
+        if (opts.winTile && opts.winTile.kind != null) {
+          const wk = opts.winTile.kind;
+          const inHand = p.hand.some(t => t.id === opts.winTile.id);
+          if (!inHand) counts[wk] = (counts[wk] || 0) + 1;
+        }
+        for (const uk of uraKinds) uraCount += counts[uk] || 0;
+        if (uraCount > 0) {
+          res.han += uraCount;
+          res.uraCount = uraCount;
+        }
+      } catch (e) {
+        uraIndicators = [];
+        uraCount = 0;
+      }
+    }
+
     const deltas = [0, 0, 0, 0];
     let payText = '';
 
@@ -52,6 +84,7 @@ window.YM = window.YM || {};
     }
 
     // 供託
+    const stickCount = g.riichiSticks;
     const stickBonus = g.riichiSticks * C.RIICHI_COST;
     deltas[winnerIdx] += stickBonus;
     g.riichiSticks = 0;
@@ -110,6 +143,52 @@ window.YM = window.YM || {};
 
     const rank = YM.Scoring.rankName(res.han, res.fu, res.yakuman);
     const winnerName = p.name;
+
+    /* --- 和了アルバム / はじめてシリーズ ---
+     * プレイヤー本人(index 0)の和了のみが対象。CPU の和了では何もしない。
+     * はじめての達成はカメラ保存の有無に関わらず自動保存する。 */
+    let albumEntry = null;
+    let newFirsts = [];
+    if (winnerIdx === 0 && YM.Album) {
+      try {
+        const firstCtx = {
+          han: res.han, fu: res.fu, yakuman: res.yakuman,
+          yakuList: res.yakuList, isDealer
+        };
+        const candidateIds = YM.Album.detectFirsts(firstCtx);
+        newFirsts = YM.Storage.recordFirsts(candidateIds, {
+          date: new Date().toISOString(),
+          handName: YM.Album.handName(g),
+          yaku: YM.Album.primaryYaku(res.yakuList),
+          score: deltas[winnerIdx]
+        });
+        albumEntry = YM.Album.buildEntry({
+          game: g,
+          winnerIdx,
+          tsumo: !!opts.tsumo,
+          isDealer,
+          entryId: YM.Album.makeEntryId(g, winnerIdx, opts.winTile.kind),
+          winKind: opts.winTile.kind,
+          yakuList: res.yakuList,
+          doraCount: res.doraCount,
+          han: res.han,
+          fu: res.fu,
+          yakuman: res.yakuman,
+          gainedPoints: deltas[winnerIdx],
+          payText,
+          stickCount,
+          doraIndicators: (g.wall && g.wall.doraIndicators || []).map(t => t.kind),
+          uraDoraIndicators: uraIndicators,
+          uraCount,
+          firstBadges: newFirsts
+        });
+      } catch (e) {
+        // アルバム関連の失敗で対局進行を止めない
+        albumEntry = null;
+        newFirsts = [];
+      }
+    }
+
     YM.timers.set(() => {
       YM.ResultUI.showWin({
         winnerIdx,
@@ -119,12 +198,16 @@ window.YM = window.YM || {};
         winKind: opts.winTile.kind,
         yakuList: res.yakuList,
         doraCount: res.doraCount,
+        uraCount,
+        uraIndicators,
         han: res.han,
         fu: res.fu,
         yakuman: res.yakuman,
         rank,
         payText,
         deltas,
+        albumEntry,
+        newFirsts,
         onNext: () => {
           YM.Round.advance({ ryuukyoku: false, dealerWon: isDealer });
         }

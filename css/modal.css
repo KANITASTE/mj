@@ -186,3 +186,170 @@
 .final-score { text-align: right; font-variant-numeric: tabular-nums; }
 .final-pt { text-align: right; font-family: var(--latin); font-size: 13px; color: #b7ac97; }
 .final-buttons { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* =====================================================================
+ * 和了アルバム関連(カメラ保存ボタン / NEW RECORD バッジ / トースト)
+ * 既存の深い赤・黒・金の意匠に合わせる。
+ * ================================================================== */
+
+.result-panel { position: relative; }
+
+/* --- カメラ(保存)ボタン: 結果ウィンドウの右上 --- */
+.album-save-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 12px 6px;
+  background: linear-gradient(180deg, rgba(46, 30, 20, .82), rgba(18, 12, 9, .92));
+  border: 1px solid var(--brass-line);
+  border-radius: 3px;
+  color: var(--champagne);
+  font-family: var(--ui-font);
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+.album-save-btn:hover:not(:disabled),
+.album-save-btn:focus-visible:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  box-shadow: 0 0 14px rgba(176, 141, 74, .3);
+  transform: translateY(-1px);
+}
+
+.album-save-btn:active:not(:disabled) { transform: translateY(0); }
+
+/* カメラアイコン(CSSのみで描画。外部アセット不要) */
+.album-btn-icon {
+  position: relative;
+  width: 22px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.album-btn-icon::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 5px;
+  width: 8px;
+  height: 3px;
+  border: 1.5px solid currentColor;
+  border-bottom: 0;
+  border-radius: 2px 2px 0 0;
+}
+
+.album-btn-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.album-btn-text {
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-indent: .16em;
+  line-height: 1;
+}
+
+/* 保存済み: 暗くしてチェックマークに変える */
+.album-save-btn.is-saved {
+  opacity: .62;
+  cursor: default;
+  border-color: rgba(176, 141, 74, .28);
+  color: rgba(205, 184, 145, .8);
+}
+
+.album-save-btn.is-saved .album-btn-icon::after {
+  width: 9px;
+  height: 5px;
+  border: 0;
+  border-left: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  border-radius: 0;
+  transform: translate(-50%, -62%) rotate(-45deg);
+}
+
+/* --- NEW RECORD バッジ帯 --- */
+.result-records {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: -2px 0 2px;
+  padding: 7px 10px;
+  background: linear-gradient(90deg, transparent, rgba(110, 26, 38, .34) 20%, rgba(110, 26, 38, .34) 80%, transparent);
+  border-top: 1px solid rgba(176, 141, 74, .3);
+  border-bottom: 1px solid rgba(176, 141, 74, .3);
+  animation: record-in .5s ease both;
+}
+
+@keyframes record-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.record-label {
+  font-family: var(--latin);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-indent: .22em;
+  color: var(--gold-bright);
+  text-shadow: 0 0 10px rgba(230, 207, 150, .5);
+}
+
+.record-badge {
+  padding: 3px 10px;
+  font-family: var(--ui-font);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: #f0dcae;
+  background: rgba(20, 12, 9, .6);
+  border: 1px solid rgba(230, 207, 150, .55);
+  border-radius: 2px;
+}
+
+/* --- 保存結果のトースト --- */
+.result-toast {
+  margin-top: 2px;
+  padding: 7px 14px;
+  font-family: var(--ui-font);
+  font-size: 13px;
+  letter-spacing: .04em;
+  color: var(--champagne);
+  background: rgba(12, 8, 6, .92);
+  border: 1px solid var(--brass-line);
+  border-radius: 2px;
+  animation: record-in .3s ease both;
+}
+
+.result-toast.is-error {
+  color: #f0c2c2;
+  border-color: rgba(160, 48, 64, .7);
+}
+
+@media (max-width: 900px) {
+  .album-save-btn { top: 10px; right: 10px; padding: 6px 9px 5px; }
+  .result-records { gap: 5px; padding: 6px 8px; }
+  .record-badge { font-size: 11px; padding: 2px 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-records, .result-toast { animation: none; }
+  .album-save-btn { transition: none; }
+  .album-save-btn:hover:not(:disabled) { transform: none; }
+}

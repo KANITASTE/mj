@@ -9,12 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Cinzel:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/reset.css">
 <link rel="stylesheet" href="css/common.css">
-<link rel="stylesheet" href="css/title.css?v=20260724-credit">
+<link rel="stylesheet" href="css/title.css?v=20260724-album">
 <link rel="stylesheet" href="css/game-start.css?v=20260723-layout-match">
 <link rel="stylesheet" href="css/table.css?v=20260723-shizi03">
 <link rel="stylesheet" href="css/tiles.css?v=20260722-stage1">
 <link rel="stylesheet" href="css/character.css?v=20260723-avatar11">
-<link rel="stylesheet" href="css/modal.css">
+<link rel="stylesheet" href="css/modal.css?v=20260724-album">
 <link rel="stylesheet" href="css/responsive.css?v=20260723-layout-match">
 <link rel="stylesheet" href="css/table-split.css?v=20260723-meld-fix">
 <link rel="stylesheet" href="css/table-overhead.css?v=20260724-batch4">
@@ -28,8 +28,8 @@
     <div class="title-frame">
       <img class="title-full-img" src="assets/newtop.png" alt="宵待ち麻雀倶楽部" draggable="false">
 
-      <button id="btn-start" class="title-hotspot hs-start" aria-label="ゲームを始める"></button>
-      <button id="btn-continue" class="title-hotspot hs-continue" aria-label="続きから" disabled></button>
+      <button id="btn-start" class="title-hotspot hs-start" aria-label="ゲームスタート（名前・アバター・対戦相手を選んで開始）" title="名前・アバター・対戦相手を選んで開始します"></button>
+      <button id="btn-continue" class="title-hotspot hs-continue" aria-label="クイックスタート（前回の設定で新しい対局を開始）" title="前回の設定で新しい対局を開始します" disabled></button>
       <button id="btn-howto" class="title-hotspot hs-howto" aria-label="遊び方"></button>
       <button id="btn-gallery" class="title-hotspot hs-gallery" aria-label="ギャラリー"></button>
       <button id="btn-credit" class="title-hotspot hs-credit" aria-label="クレジット"></button>
@@ -137,24 +137,94 @@
           <span class="setting-label">打牌操作</span>
           <button id="set-discard" class="toggle-btn">2クリック</button>
         </div>
-        <div class="setting-row danger-row">
-          <span class="setting-label">セーブデータ</span>
-          <button id="set-reset" class="toggle-btn danger">初期化</button>
+
+        <!-- ===== データ管理 ===== -->
+        <div class="data-section">
+          <h3 class="data-heading">BACKUP DATA - データの保管</h3>
+          <div class="data-buttons">
+            <button id="set-export" class="menu-btn data-btn">バックアップを書き出す</button>
+            <button id="set-import" class="menu-btn data-btn">バックアップを読み込む</button>
+            <input type="file" id="set-import-file" accept="application/json,.json" hidden>
+          </div>
+          <p class="data-note">記録はこのブラウザ内に保存されます。ブラウザのデータ削除、シークレットモード、端末変更などにより消える場合があります。大切な記録はバックアップを書き出してください。</p>
+          <div id="data-message" class="data-message hidden" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="data-section danger-row">
+          <h3 class="data-heading">セーブデータの初期化</h3>
+          <div class="data-buttons">
+            <button id="set-reset-settings" class="menu-btn data-btn">設定のみ初期化</button>
+            <button id="set-reset-records" class="menu-btn data-btn danger-btn">記録のみ初期化</button>
+          </div>
+          <button id="set-reset" class="reset-all-link">すべてのデータを初期化</button>
         </div>
       </div>
       <button class="menu-btn back-btn" data-back>もどる</button>
+    </div>
+
+    <!-- 初期化・読み込みの確認ダイアログ -->
+    <div id="data-confirm" class="data-confirm hidden" role="dialog" aria-modal="true" aria-labelledby="data-confirm-title">
+      <div class="data-confirm-panel">
+        <h3 id="data-confirm-title" class="data-confirm-title"></h3>
+        <p id="data-confirm-text" class="data-confirm-text"></p>
+        <p id="data-confirm-warn" class="data-confirm-warn hidden"></p>
+        <p id="data-confirm-backup-note" class="data-confirm-note hidden">必要な場合は、初期化する前にバックアップを書き出してください。</p>
+        <button id="data-confirm-export" class="menu-btn data-btn hidden">バックアップを書き出す</button>
+        <div class="data-confirm-buttons">
+          <button id="data-confirm-yes" class="menu-btn danger-btn">削除する</button>
+          <button id="data-confirm-no" class="menu-btn">キャンセル</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ===== ギャラリー ===== -->
   <section id="screen-gallery" class="screen sub-screen">
-    <div class="sub-panel wide">
-      <h2 class="sub-title">GALLERY - ギャラリー</h2>
-      <div id="gallery-grid" class="gallery-grid"></div>
-      <div id="gallery-viewer" class="gallery-viewer hidden">
-        <div id="gallery-viewer-img"></div>
-        <button class="menu-btn" id="gallery-viewer-close">閉じる</button>
+    <div class="sub-panel wide album-panel">
+      <h2 class="sub-title">和了アルバム - AGARI ALBUM</h2>
+
+      <!-- 一覧 -->
+      <div id="album-list-view">
+        <div class="album-toolbar">
+          <span class="album-hint">印象に残った和了を、結果画面のカメラボタンで保存できます</span>
+          <span id="album-count" class="album-count"></span>
+        </div>
+        <div id="album-grid" class="album-grid"></div>
+        <div id="album-empty" class="album-empty hidden">
+          <p class="album-empty-main">まだ保存された和了はありません</p>
+          <p class="album-empty-sub">印象に残った和了をカメラボタンで保存できます</p>
+        </div>
       </div>
+
+      <!-- 詳細 -->
+      <div id="album-detail" class="album-detail hidden">
+        <div class="album-detail-head">
+          <h3 id="album-detail-title" class="album-detail-title"></h3>
+          <span id="album-detail-date" class="album-detail-date"></span>
+        </div>
+        <div id="album-detail-badges" class="album-detail-badges hidden"></div>
+        <div id="album-detail-hand" class="album-detail-hand"></div>
+        <div id="album-detail-dora" class="album-detail-dora"></div>
+        <div id="album-detail-yaku" class="album-detail-yaku"></div>
+        <div id="album-detail-score" class="album-detail-score"></div>
+        <div id="album-detail-players" class="album-detail-players"></div>
+        <div id="album-detail-message" class="album-detail-message hidden" role="status" aria-live="polite"></div>
+
+        <div id="album-delete-confirm" class="album-confirm hidden">
+          <p class="album-confirm-text">この和了記録をアルバムから削除しますか？</p>
+          <div class="album-confirm-buttons">
+            <button class="menu-btn danger-btn" id="album-delete-yes">削除する</button>
+            <button class="menu-btn" id="album-delete-no">キャンセル</button>
+          </div>
+        </div>
+
+        <div class="album-detail-buttons">
+          <button class="menu-btn" id="album-back-list">一覧へもどる</button>
+          <button class="menu-btn" id="album-export-png">PNG画像として保存</button>
+          <button class="menu-btn danger-btn" id="album-delete">この記録を削除</button>
+        </div>
+      </div>
+
       <button class="menu-btn back-btn" data-back>もどる</button>
     </div>
   </section>
@@ -362,11 +432,17 @@
       <!-- 局結果オーバーレイ -->
       <div id="result-overlay" class="overlay hidden">
         <div class="overlay-panel result-panel">
+          <button id="result-album-btn" class="album-save-btn hidden" type="button" aria-label="この和了を和了アルバムに保存">
+            <span class="album-btn-icon" aria-hidden="true"></span>
+            <span class="album-btn-text">ALBUM</span>
+          </button>
           <div id="result-banner"></div>
+          <div id="result-records" class="result-records hidden"></div>
           <div id="result-hand"></div>
           <div id="result-yaku-list"></div>
           <div id="result-score"></div>
           <div id="result-deltas"></div>
+          <div id="result-toast" class="result-toast hidden" role="status" aria-live="polite"></div>
           <button class="menu-btn" id="result-next">つづける</button>
         </div>
       </div>
@@ -450,7 +526,7 @@
 <script src="data/characters.js?v=20260722-2"></script>
 <script src="data/dialogues.js?v=20260721-2"></script>
 <script src="js/mahjong/tiles.js"></script>
-<script src="js/mahjong/wall.js"></script>
+<script src="js/mahjong/wall.js?v=20260724-ura"></script>
 <script src="js/mahjong/hand-analyzer.js"></script>
 <script src="js/mahjong/fu.js"></script>
 <script src="js/mahjong/yaku.js"></script>
@@ -461,18 +537,20 @@
 <script src="js/cpu/cpu-balance.js"></script>
 <script src="js/cpu/cpu-defense.js"></script>
 <script src="js/audio/audio.js?v=20260724-gamebgm"></script>
-<script src="js/storage/storage.js?v=20260724-discard"></script>
+<script src="js/storage/storage.js?v=20260724-album"></script>
 <script src="js/ui/dialogue.js?v=20260722-2"></script>
 <script src="js/ui/animation.js?v=20260722-stage1"></script>
 <script src="js/ui/character-ui.js?v=20260723-shizi02"></script>
 <script src="js/ui/render.js?v=20260724-batch3"></script>
-<script src="js/ui/result-ui.js"></script>
+<script src="js/ui/result-ui.js?v=20260724-album"></script>
+<script src="js/ui/album-ui.js?v=20260724-album"></script>
 <script src="js/ui/dev-panel.js?v=20260721-2"></script>
 <script src="js/game/game-state.js?v=20260724-batch2"></script>
 <script src="js/game/round-manager.js?v=20260724-batch2"></script>
 <script src="js/game/turn-manager.js?v=20260724-oneclick"></script>
 <script src="js/game/call-manager.js"></script>
-<script src="js/game/result-manager.js?v=20260721-2"></script>
-<script src="js/main.js?v=20260724-batch2"></script>
+<script src="js/game/album.js?v=20260724-album"></script>
+<script src="js/game/result-manager.js?v=20260724-album"></script>
+<script src="js/main.js?v=20260724-album"></script>
 </body>
 </html>
