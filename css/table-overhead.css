@@ -849,10 +849,11 @@ body:has(#screen-game.active) #crt-overlay {
   bottom: calc(var(--ovh-table) * .012);
 }
 
+/* 下家: 下家の牌(右レール)の右上。卓の外(右余白の外側の帯)なので
+ * 捨て牌や副露に一切かからない。 */
 #table-chicha-1 {
-  right: calc(var(--ovh-table) * .012);
-  /* 対面の手牌が卓の右上隅近くまで伸びるため、その下に置く。 */
-  top: calc(var(--ovh-back-h) + var(--ovh-table) * .022);
+  right: calc(-1 * var(--ovh-margin-x) + clamp(6px, .8vw, 12px));
+  top: calc((var(--ovh-table) - var(--ovh-side-rail)) / 2 + 2px);
   transform: rotate(-90deg);
 }
 
@@ -862,16 +863,19 @@ body:has(#screen-game.active) #crt-overlay {
   transform: rotate(180deg);
 }
 
+/* 上家: 上家の牌(左レール)の左下(上家視点の右手側)。同じく卓の外。 */
 #table-chicha-3 {
-  left: calc(var(--ovh-table) * .012);
-  bottom: calc(var(--ovh-table) * .012);
+  left: calc(-1 * var(--ovh-margin-x) + clamp(6px, .8vw, 12px));
+  bottom: calc((var(--ovh-table) - var(--ovh-side-rail)) / 2 + 2px);
   transform: rotate(90deg);
 }
 
-/* --- (7) 席関係ラベル(対面・下家・上家)を2pt大きく --- */
+/* --- (7) 席関係ラベル(対面・下家・上家)を2pt大きく ---
+ * 拡大で文字の下端がカードの飾り枠にかかるため、少し上へ逃がす。 */
 #table-player-cards .seat-relation,
 .seat-relation {
   font-size: clamp(11px, calc(.72vw + 2px), 14px);
+  top: -3px;
 }
 
 /* =====================================================================
@@ -924,6 +928,10 @@ body:has(#screen-game.active) #crt-overlay {
   flex-direction: column-reverse;
   justify-content: flex-start;  /* column-reverse の主軸始点 = 下端 */
   align-items: flex-end;        /* 段は右(対面の左)から詰める */
+  /* 旧グリッドの direction: rtl が残ると row-reverse が反転し、
+   * 対面視点で右→左に並んでしまう。ltr に戻して
+   * 「対面の左(画面右)→右(画面左)」の順で置く。 */
+  direction: ltr;
 }
 
 #center-zone .river-top .river-row {
