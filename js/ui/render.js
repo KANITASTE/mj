@@ -231,17 +231,26 @@ window.YM = window.YM || {};
     }
   }
 
-  /* --- 河 --- */
+  /* --- 河 ---
+   * 6枚ごとに「段」(.river-row)へまとめる。段ごとに独立してプレーヤーの
+   * 左から詰めるので、リーチの横倒し牌があってもその段だけが広がり、
+   * 他の段に隙間ができない。19枚目以降は3段目に続けて置く。 */
   function renderRiver(G, i) {
     const el = $id(`river-${i}`);
     el.innerHTML = '';
     const p = G.players[i];
+    let row = null;
     p.discards.forEach((d, n) => {
+      if (n % 6 === 0 && n < 18) {
+        row = document.createElement('div');
+        row.className = `river-row r${n / 6 + 1}`;
+        el.appendChild(row);
+      }
       const opts = { mini: true, classes: [] };
       if (d.riichiDecl) opts.classes.push('riichi-decl');
       if (d.called) opts.classes.push('called-out');
       if (n === p.discards.length - 1 && G.lastDiscardPlayer === i && !d.called) opts.classes.push('last-discard');
-      el.appendChild(UI.tileEl(d.tile.kind, opts));
+      row.appendChild(UI.tileEl(d.tile.kind, opts));
     });
   }
 

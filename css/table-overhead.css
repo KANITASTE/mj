@@ -873,3 +873,106 @@ body:has(#screen-game.active) #crt-overlay {
 .seat-relation {
   font-size: clamp(11px, calc(.72vw + 2px), 14px);
 }
+
+/* =====================================================================
+ * 10. 2026-07-24 河の段構造化(shizi09 指示)
+ *
+ * render.js が捨て牌を6枚ごとの .river-row にまとめるようになった。
+ * グリッドをやめ、段ごとに独立した行として並べる:
+ *   (1) リーチの横倒し牌はその段だけを広げ、他の段に隙間を作らない。
+ *       各段はプレーヤーの左から隙間なく詰める。
+ *   (2) 牌画像の下端には側面(厚み)が約7.3%描かれている。2段目以降を
+ *       側面ぶんだけ前の段に重ねて、後段の側面が段間に見えないようにする。
+ *       (回転により側面の向きは 自分=下 / 対面=上 / 上家=左 / 下家=右)
+ * 1枚目の置き位置は従来どおり固定
+ *   (自分=左上角 / 対面=右下角 / 上家=右上角 / 下家=左下角 が各段の起点)。
+ * ================================================================== */
+#center-zone .river,
+#player-river-lane .river-bottom {
+  --river-edge: calc(var(--river-tile-height) * 23 / 315);
+  display: flex;
+  gap: 0;
+}
+
+#center-zone .river .river-row {
+  display: flex;
+  gap: 0;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+/* --- 自分: 段は縦積み。1段目が上(中央側)、以後は手前(下)へ。 --- */
+#player-river-lane .river-bottom {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;      /* 段は左(自分の左)から詰める */
+}
+
+#player-river-lane .river-bottom .river-row {
+  flex-direction: row;
+  height: var(--river-tile-height);
+  align-items: center;
+}
+
+/* 側面は各牌の下端 → 次の段(手前)が前の段の下端に重なる。 */
+#player-river-lane .river-bottom .river-row + .river-row {
+  margin-top: calc(-1 * var(--river-edge));
+}
+
+/* --- 対面: 段は縦積みの逆順。1段目が下(中央側)、以後は対面側(上)へ。 --- */
+#center-zone .river-top {
+  flex-direction: column-reverse;
+  justify-content: flex-start;  /* column-reverse の主軸始点 = 下端 */
+  align-items: flex-end;        /* 段は右(対面の左)から詰める */
+}
+
+#center-zone .river-top .river-row {
+  flex-direction: row-reverse;  /* 対面の左 = 画面の右 */
+  height: var(--river-tile-height);
+  align-items: center;
+}
+
+/* 側面は各牌の上端(180度回転) → 次の段が前の段の上端に重なる。 */
+#center-zone .river-top .river-row + .river-row {
+  margin-bottom: calc(-1 * var(--river-edge));
+}
+
+/* --- 上家: 段は縦列。1列目が右(中央側)、以後は上家側(左)へ。 --- */
+#center-zone .river-left {
+  flex-direction: row-reverse;
+  justify-content: flex-start;  /* row-reverse の主軸始点 = 右端 */
+  align-items: flex-start;
+}
+
+#center-zone .river-left .river-row {
+  flex-direction: column;       /* 上家の左 = 画面の上 */
+  width: var(--river-tile-height);
+  height: 100%;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* 側面は各牌の左端(90度回転) → 次の列が前の列の左端に重なる。 */
+#center-zone .river-left .river-row + .river-row {
+  margin-right: calc(-1 * var(--river-edge));
+}
+
+/* --- 下家: 段は縦列。1列目が左(中央側)、以後は下家側(右)へ。 --- */
+#center-zone .river-right {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+#center-zone .river-right .river-row {
+  flex-direction: column-reverse; /* 下家の左 = 画面の下 */
+  width: var(--river-tile-height);
+  height: 100%;
+  align-items: center;
+  justify-content: flex-start;    /* column-reverse の主軸始点 = 下端 */
+}
+
+/* 側面は各牌の右端(-90度回転) → 次の列が前の列の右端に重なる。 */
+#center-zone .river-right .river-row + .river-row {
+  margin-left: calc(-1 * var(--river-edge));
+}
