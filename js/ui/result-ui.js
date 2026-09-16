@@ -226,16 +226,8 @@ window.YM = window.YM || {};
     }
     St.save();
 
-    const ayanoAtTable = YM.Game.G.players.some(p => p.characterId === 'ayano');
-    $id('final-event').classList.toggle('hidden', !playerWon || !ayanoAtTable);
-    $id('final-event').onclick = () => {
-      YM.Audio.se('event');
-      $id('final-overlay').classList.add('hidden');
-      const lines = YM.DIALOGUES.ayano.event01;
-      YM.CharacterUI.runEvent('ayano', lines, () => {
-        YM.CharacterUI.showEventChoices();
-      });
-    };
+    // 勝利イベント(綾乃)は未実装のため、ボタンは表示しない
+    $id('final-event').classList.add('hidden');
     $id('final-rematch').onclick = () => {
       $id('final-overlay').classList.add('hidden');
       YM.Audio.se('decide');
